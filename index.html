@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero Modelo UNEMI</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f2ee;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --accent: #2a78d6; --accent-soft: #cde2fb;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --neutral: #c3c2b7; --good-text: #006300;
+  --heat-0: #f0efec; --heat-1: #fbe3d9; --heat-2: #f5b9a0; --heat-3: #ec835a; --heat-4: #d03b3b;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --accent: #3987e5; --accent-soft: #1c3a5f;
+    --neutral: #4a4a46; --good-text: #0ca30c;
+    --heat-0: #262624; --heat-1: #3d2a22; --heat-2: #7a3f28; --heat-3: #ec835a; --heat-4: #d03b3b;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --accent: #3987e5; --accent-soft: #1c3a5f;
+  --neutral: #4a4a46; --good-text: #0ca30c;
+  --heat-0: #262624; --heat-1: #3d2a22; --heat-2: #7a3f28; --heat-3: #ec835a; --heat-4: #d03b3b;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px 48px; }
+
+header.top { position: sticky; top: 0; z-index: 20; background: var(--page); border-bottom: 1px solid var(--border); }
+.top-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 0 10px; }
+.brand { flex: 1 1 320px; min-width: 0; }
+.brand h1 { font-size: 18px; margin: 0; letter-spacing: -.01em; }
+.brand p { margin: 2px 0 0; color: var(--ink-2); font-size: 12.5px; }
+.top-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.ctl input[type=date], .ctl select, .search { height: 32px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 0 8px; }
+.btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; white-space: nowrap; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.on { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 10px 12px; cursor: pointer; color: var(--ink-2); border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 0 6px; }
+.filters .search { flex: 1 1 200px; min-width: 160px; }
+.filters select { max-width: 220px; height: 32px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 0 8px; }
+.chip { height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 12.5px; }
+.chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
+.filter-note { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+.banner { display: none; margin: 10px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--accent-soft); font-size: 13px; align-items: center; gap: 10px; flex-wrap: wrap; }
+.banner.show { display: flex; }
+
+.view { display: none; padding-top: 10px; }
+.view.active { display: block; }
+.grid { display: grid; gap: 14px; }
+.g-kpi { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.g-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); }
+.g-3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+.card h2 { font-size: 14px; margin: 0 0 2px; }
+.card .sub { margin: 0 0 12px; font-size: 12.5px; color: var(--ink-2); }
+.kpi .label { font-size: 12.5px; color: var(--ink-2); }
+.kpi .value { font-size: 30px; font-weight: 650; letter-spacing: -.02em; line-height: 1.15; margin-top: 4px; }
+.kpi .value small { font-size: 15px; font-weight: 500; color: var(--ink-2); }
+.kpi .foot { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.meter { height: 6px; background: var(--grid); border-radius: 3px; position: relative; margin-top: 10px; overflow: visible; }
+.meter > i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.meter > b { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--ink); border-radius: 1px; }
+
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap; }
+.status .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); margin: 8px 0 0; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid var(--grid); cursor: pointer; }
+.list li:first-child { border-top: 0; }
+.list li:hover .t { text-decoration: underline; }
+.list .t { font-size: 13px; }
+.list .m { font-size: 12px; color: var(--muted); }
+.list .d { font-size: 12px; color: var(--ink-2); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+/* Cronograma */
+.gantt-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.gantt { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.gantt-inner { min-width: 900px; position: relative; }
+.g-row { display: grid; grid-template-columns: 300px 1fr; min-height: 30px; border-top: 1px solid var(--grid); }
+.g-row.head { position: sticky; top: 0; background: var(--surface); z-index: 2; border-top: 0; min-height: 40px; }
+.g-row.phase { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+.g-label { padding: 6px 10px; font-size: 12.5px; border-right: 1px solid var(--grid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.g-label .id { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
+.g-track { position: relative; }
+.g-bar { position: absolute; top: 7px; height: 16px; border-radius: 4px; background: var(--neutral); cursor: pointer; overflow: hidden; min-width: 4px; }
+.g-bar > i { position: absolute; inset: 0 auto 0 0; background: rgba(0,0,0,.28); }
+.g-bar.crit { outline: 2px solid var(--ink); outline-offset: 1px; }
+.g-phase { position: absolute; top: 9px; height: 12px; border-radius: 3px; background: var(--axis); opacity: .7; }
+.g-tick { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--grid); }
+.g-tick span { position: absolute; top: 4px; left: 4px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.g-tick.major { border-left-color: var(--axis); }
+.g-tick.major span { color: var(--ink-2); font-weight: 600; }
+.g-today { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--accent); z-index: 3; pointer-events: none; }
+.g-today span { position: absolute; top: 22px; left: 4px; font-size: 11px; color: var(--accent); font-weight: 600; white-space: nowrap; background: var(--surface); padding: 0 3px; }
+.g-row:not(.head) .g-tick span, .g-row:not(.head) .g-today span { display: none; }
+.g-ms { position: absolute; top: 8px; width: 13px; height: 13px; transform: translateX(-6.5px) rotate(45deg); border: 2px solid var(--surface); cursor: pointer; z-index: 2; }
+
+/* Hitos */
+.hito { display: flex; flex-direction: column; gap: 8px; }
+.hito .hd { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.hito .code { font-weight: 700; font-size: 18px; }
+.hito ul { margin: 0; padding: 0; list-style: none; }
+.hito li { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 3px 0; }
+.hito li input { margin-top: 3px; }
+.days { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* Normativa */
+.kanban { display: grid; grid-template-columns: repeat(6, minmax(180px, 1fr)); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.col { background: var(--surface-2); border-radius: 10px; padding: 10px; min-height: 120px; }
+.col h3 { font-size: 12.5px; margin: 0 0 8px; display: flex; justify-content: space-between; color: var(--ink-2); }
+.ncard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12.5px; cursor: pointer; }
+.ncard .n { font-weight: 600; margin-bottom: 4px; }
+.ncard .r { color: var(--muted); font-size: 11.5px; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--ink-2); margin-right: 4px; }
+.tag.core { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.tag.late { border-color: var(--critical); color: var(--critical); font-weight: 600; }
+
+/* Riesgos */
+.heat { display: grid; grid-template-columns: 70px repeat(3, 1fr); grid-template-rows: repeat(3, 72px) 28px; gap: 4px; }
+.heat .cell { border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; }
+.heat .cell b { font-size: 20px; }
+.heat .cell span { font-size: 11px; }
+.heat .cell[aria-pressed=true] { border-color: var(--ink); }
+.heat .ax { display: flex; align-items: center; justify-content: center; font-size: 11.5px; color: var(--ink-2); text-align: center; }
+
+/* Tabla */
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 8px 8px; border-top: 1px solid var(--grid); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-2); border-top: 0; position: sticky; top: 0; background: var(--surface); cursor: pointer; white-space: nowrap; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+.table-wrap { overflow-x: auto; max-height: 70vh; }
+
+/* Indicadores */
+.ind .fam { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.ind .v { font-size: 26px; font-weight: 650; margin: 6px 0 2px; }
+.ind .v.none { font-size: 13px; font-weight: 500; color: var(--muted); }
+.ind dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12px; margin: 8px 0 0; }
+.ind dt { color: var(--muted); }
+.ind dd { margin: 0; color: var(--ink-2); }
+
+/* Panel lateral */
+.drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(440px, 100%); background: var(--surface); border-left: 1px solid var(--border); z-index: 50; transform: translateX(100%); transition: transform .2s ease; overflow-y: auto; padding: 20px; box-shadow: -8px 0 24px rgba(0,0,0,.12); }
+.drawer.open { transform: none; }
+.drawer h2 { font-size: 16px; margin: 4px 0 10px; }
+.drawer .close { position: absolute; top: 12px; right: 12px; }
+.drawer dl { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; font-size: 13px; }
+.drawer dt { color: var(--muted); }
+.drawer dd { margin: 0; }
+.drawer .edit { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--grid); display: grid; gap: 10px; }
+.drawer label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
+.drawer input, .drawer select, .drawer textarea { border: 1px solid var(--border); background: var(--page); border-radius: 8px; padding: 6px 8px; }
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.25); z-index: 40; display: none; }
+.scrim.open { display: block; }
+
+.tip { position: fixed; z-index: 60; pointer-events: none; background: var(--ink); color: var(--page); font-size: 12px; padding: 7px 9px; border-radius: 7px; max-width: 300px; opacity: 0; transition: opacity .08s; }
+.tip.show { opacity: 1; }
+svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
+.note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (max-width: 640px) {
+  .g-row { grid-template-columns: 160px 1fr; }
+  .kpi .value { font-size: 26px; }
+  .filter-note { margin-left: 0; }
+}
+@media print {
+  header.top { position: static; }
+  .top-actions, .filters, .tabs, .banner, .gantt-tools { display: none !important; }
+  .view { display: block !important; page-break-after: always; }
+  .card { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand">
+        <h1>Seguimiento del Modelo Educativo UNEMI 2026</h1>
+        <p id="subtitle">Plan de Implementación 2027–2030</p>
+      </div>
+      <div class="top-actions">
+        <label class="ctl" title="Cambie la fecha para ver qué debería estar listo en otro momento">Fecha de corte
+          <input type="date" id="corte">
+        </label>
+        <button class="btn" id="hoy">Hoy</button>
+        <button class="btn" id="editToggle" aria-pressed="false">Modo edición</button>
+        <button class="btn" id="theme" aria-label="Cambiar tema">◐</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="banner" id="banner">
+    <span id="bannerText"></span>
+    <button class="btn primary" id="exportData">Exportar data.js</button>
+    <button class="btn" id="discard">Descartar cambios locales</button>
+  </div>
+
+  <div class="filters" id="filters">
+    <input class="search" id="q" type="search" placeholder="Buscar actividad, producto o unidad…" aria-label="Buscar">
+    <select class="ctl" id="fFase" aria-label="Fase"><option value="">Todas las fases</option></select>
+    <select class="ctl" id="fNivel" aria-label="Nivel">
+      <option value="">Todos los niveles</option><option>Grado</option><option>Posgrado</option><option value="EC">Educación Continua</option><option>Transversal</option>
+    </select>
+    <select class="ctl" id="fResp" aria-label="Unidad responsable"><option value="">Todas las unidades</option></select>
+    <select class="ctl" id="fSit" aria-label="Situación"><option value="">Toda situación</option></select>
+    <button class="chip" id="fCrit" aria-pressed="false">Solo ruta crítica</button>
+    <button class="btn" id="clear">Limpiar</button>
+    <span class="filter-note" id="filterNote"></span>
+  </div>
+
+  <!-- RESUMEN -->
+  <section class="view" id="v-resumen">
+    <div class="grid g-kpi" id="kpis"></div>
+    <div class="grid g-2" style="margin-top:14px">
+      <div class="card">
+        <h2>Avance planificado frente al real</h2>
+        <p class="sub">Curva S ponderada por duración de las actividades filtradas</p>
+        <div id="curvaS"></div>
+        <div class="legend"><span><i class="sw" style="background:var(--axis)"></i>Planificado</span><span><i class="sw" style="background:var(--accent)"></i>Real reportado</span><span><i class="sw" style="background:var(--accent);width:2px"></i>Fecha de corte</span></div>
+      </div>
+      <div class="card">
+        <h2>Avance por fase</h2>
+        <p class="sub">Barra: avance real · Marca: lo que debería llevarse a la fecha de corte</p>
+        <div id="porFase"></div>
+      </div>
+    </div>
+    <div class="grid g-3" style="margin-top:14px">
+      <div class="card"><h2>Alertas</h2><p class="sub">Vencidas, bloqueadas o con atraso frente al plan</p><ul class="list" id="alertas"></ul></div>
+      <div class="card"><h2>Próximos 30 días</h2><p class="sub">Entregas que cierran después de la fecha de corte</p><ul class="list" id="proximos"></ul></div>
+      <div class="card"><h2>Lectura del momento</h2><p class="sub">Generada a partir de los datos</p><div id="lectura" style="font-size:13px"></div></div>
+    </div>
+  </section>
+
+  <!-- CRONOGRAMA -->
+  <section class="view" id="v-cronograma">
+    <div class="gantt-tools">
+      <span class="ctl">Ventana</span>
+      <div id="zoom" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <span class="legend" id="ganttLegend" style="margin:0 0 0 auto"></span>
+    </div>
+    <div class="gantt"><div class="gantt-inner" id="gantt"></div></div>
+    <p class="note">Rombo: hito de control. Contorno grueso: actividad de la ruta crítica. El sombreado dentro de cada barra es el avance reportado. Clic en una fila para ver el detalle.</p>
+  </section>
+
+  <!-- HITOS -->
+  <section class="view" id="v-hitos">
+    <div class="grid g-3" id="hitosGrid"></div>
+  </section>
+
+  <!-- NORMATIVA -->
+  <section class="view" id="v-normativa">
+    <div class="grid g-kpi" id="normKpis" style="margin-bottom:14px"></div>
+    <div class="kanban" id="kanban"></div>
+    <p class="note">Ruta de trámite según la Tabla 9 del Plan y el IGNI. En modo edición, clic en una tarjeta para moverla de etapa.</p>
+  </section>
+
+  <!-- INDICADORES -->
+  <section class="view" id="v-indicadores">
+    <div class="grid g-3" id="indGrid"></div>
+    <p class="note">Las metas numéricas se fijan con la línea base de julio de 2027 (Plan, 8.1). Los indicadores I02 e I03 se calculan en vivo desde este tablero.</p>
+  </section>
+
+  <!-- RIESGOS -->
+  <section class="view" id="v-riesgos">
+    <div class="grid g-2">
+      <div class="card">
+        <h2>Mapa de calor</h2>
+        <p class="sub">Probabilidad × impacto de los riesgos activos. Clic en una celda para filtrar.</p>
+        <div class="heat" id="heat"></div>
+      </div>
+      <div class="card">
+        <h2 id="riskTitle">Riesgos</h2>
+        <p class="sub">Medida de control y responsable (Tabla 28)</p>
+        <ul class="list" id="riskList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESPONSABLES -->
+  <section class="view" id="v-responsables">
+    <div class="card">
+      <h2>Carga y situación por unidad</h2>
+      <p class="sub">Actividades donde la unidad es responsable directa, según los filtros. Ayuda a vigilar el riesgo de sobrecarga (RG02).</p>
+      <div id="cargaChart"></div>
+      <div class="legend" id="cargaLegend"></div>
+    </div>
+  </section>
+
+  <!-- DATOS -->
+  <section class="view" id="v-datos">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        <div><h2>Matriz operativa</h2><p class="sub" style="margin:0" id="tablaSub"></p></div>
+        <button class="btn" id="csv">Descargar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tabla"></table></div>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><button class="btn close" id="closeDrawer" aria-label="Cerrar">✕</button><div id="drawerBody"></div></aside>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var BASE = window.PLAN_DATA;
+  var LS_KEY = "unemi-modelo-overrides-v1";
+  var DAY = 86400000;
+
+  // ---------- utilidades ----------
+  function d(s) { var p = s.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function iso(t) { return new Date(t).toISOString().slice(0, 10); }
+  function todayISO() { var n = new Date(); return iso(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
+  var MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  function fmt(s) { var t = new Date(d(s)); return t.getUTCDate() + " " + MES[t.getUTCMonth()] + " " + t.getUTCFullYear(); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function pct(x) { return Math.round(x * 100); }
+  function $(id) { return document.getElementById(id); }
+  function store(get, val) { try { if (get) return JSON.parse(localStorage.getItem(LS_KEY) || "null"); localStorage.setItem(LS_KEY, JSON.stringify(val)); } catch (e) { return null; } }
+
+  // ---------- estado de la aplicación ----------
+  var overrides = store(true) || { actividades: {}, hitos: {}, instrumentos: {}, riesgos: {}, indicadores: {} };
+  var S = { corte: todayISO(), tab: "resumen", edit: false, zoom: "all", q: "", fase: "", nivel: "", resp: "", sit: "", crit: false, riskCell: null, sort: { k: "inicio", dir: 1 } };
+  var DATA;
+
+  function merged() {
+    var x = JSON.parse(JSON.stringify(BASE));
+    ["actividades", "hitos", "instrumentos", "riesgos", "indicadores"].forEach(function (k) {
+      x[k].forEach(function (it) { var o = overrides[k] && overrides[k][it.id]; if (o) Object.assign(it, o); });
+    });
+    return x;
+  }
+  function setOverride(col, id, patch) {
+    overrides[col] = overrides[col] || {};
+    overrides[col][id] = Object.assign({}, overrides[col][id] || {}, patch, { actualizado: todayISO() });
+    store(false, overrides); refresh();
+  }
+  function countOverrides() { var n = 0; for (var k in overrides) n += Object.keys(overrides[k] || {}).length; return n; }
+
+  // ---------- situación calculada ----------
+  var SIT = {
+    "Completado":  { c: "var(--good)",     i: "✓" },
+    "En curso":    { c: "var(--accent)",   i: "●" },
+    "Por vencer":  { c: "var(--warning)",  i: "◷" },
+    "En riesgo":   { c: "var(--serious)",  i: "▲" },
+    "Vencido":     { c: "var(--critical)", i: "✕" },
+    "Bloqueado":   { c: "var(--critical)", i: "■" },
+    "Programado":  { c: "var(--neutral)",  i: "○" },
+    "Cancelado":   { c: "var(--neutral)",  i: "–" }
+  };
+  var SIT_ORDER = ["Vencido", "Bloqueado", "En riesgo", "Por vencer", "En curso", "Programado", "Completado", "Cancelado"];
+
+  function planned(a, t) { var s = d(a.inicio), e = d(a.fin) + DAY; return clamp((t - s) / (e - s), 0, 1); }
+  function real(a) { return a.estado === "Completado" ? 1 : a.estado === "Cancelado" ? 0 : clamp((+a.avance || 0) / 100, 0, 1); }
+  function weight(a) { return (d(a.fin) - d(a.inicio)) / DAY + 1; }
+  function situacion(a, t) {
+    if (a.estado === "Completado") return "Completado";
+    if (a.estado === "Cancelado") return "Cancelado";
+    if (a.estado === "Bloqueado") return "Bloqueado";
+    var s = d(a.inicio), e = d(a.fin);
+    if (t > e) return "Vencido";
+    if (t < s) return "Programado";
+    var gap = planned(a, t) - real(a);
+    if (gap > 0.25) return "En riesgo";
+    if ((e - t) / DAY <= 7) return "Por vencer";
+    return "En curso";
+  }
+  function statusHTML(s) { var x = SIT[s] || SIT["Programado"]; return '<span class="status"><span class="dot" style="background:' + x.c + '"></span>' + x.i + " " + esc(s) + "</span>"; }
+
+  // ---------- filtros ----------
+  function units(a) { return (a.responsables || []).concat(a.participan || []); }
+  function filtered() {
+    var t = d(S.corte), q = S.q.toLowerCase();
+    return DATA.actividades.filter(function (a) {
+      if (S.fase && a.fase !== S.fase) return false;
+      if (S.nivel && a.nivel !== S.nivel) return false;
+      if (S.resp && units(a).indexOf(S.resp) < 0) return false;
+      if (S.crit && !a.critica) return false;
+      if (S.sit && situacion(a, t) !== S.sit) return false;
+      if (q && (a.id + " " + a.nombre + " " + a.producto + " " + units(a).join(" ") + " " + a.componente).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+  function anyFilter() { return S.q || S.fase || S.nivel || S.resp || S.sit || S.crit; }
+
+  function progressAt(list, t) {
+    var w = 0, p = 0, r = 0;
+    list.forEach(function (a) { if (a.estado === "Cancelado") return; var k = weight(a); w += k; p += k * planned(a, t); r += k * real(a); });
+    return { plan: w ? p / w : 0, real: w ? r / w : 0 };
+  }
+
+  // ---------- pestañas ----------
+  var TABS = [["resumen", "Resumen"], ["cronograma", "Cronograma"], ["hitos", "Hitos"], ["normativa", "Normativa"], ["indicadores", "Indicadores"], ["riesgos", "Riesgos"], ["responsables", "Responsables"], ["datos", "Matriz"]];
+  function buildTabs() {
+    $("tabs").innerHTML = TABS.map(function (t) { return '<button role="tab" data-t="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '">' + t[1] + "</button>"; }).join("");
+    $("tabs").onclick = function (e) { var b = e.target.closest("button"); if (!b) return; S.tab = b.dataset.t; try { localStorage.setItem("unemi-tab", S.tab); } catch (x) {} buildTabs(); refresh(); };
+    TABS.forEach(function (t) { $("v-" + t[0]).classList.toggle("active", S.tab === t[0]); });
+    var actFilters = ["resumen", "cronograma", "responsables", "datos"].indexOf(S.tab) >= 0;
+    $("filters").style.display = actFilters ? "" : "none";
+  }
+
+  // ---------- tooltip ----------
+  var tip = $("tip");
+  document.addEventListener("mousemove", function (e) {
+    var el = e.target.closest && e.target.closest("[data-tip]");
+    if (!el) { tip.classList.remove("show"); return; }
+    tip.innerHTML = el.getAttribute("data-tip");
+    var x = e.clientX + 14, y = e.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    if (x + w > innerWidth - 8) x = e.clientX - w - 14;
+    if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+    tip.style.left = x + "px"; tip.style.top = y + "px"; tip.classList.add("show");
+  });
+  function actTip(a) {
+    var s = situacion(a, d(S.corte));
+    return "<b>" + esc(a.id + " · " + a.nombre) + "</b><br>" + fmt(a.inicio) + " → " + fmt(a.fin) + "<br>" + esc((a.responsables || []).join(", ")) + "<br>" + (SIT[s].i + " " + s) + " · avance " + pct(real(a)) + " % (plan " + pct(planned(a, d(S.corte))) + " %)";
+  }
+
+  // ---------- RESUMEN ----------
+  function renderResumen(list) {
+    var t = d(S.corte), pr = progressAt(list, t);
+    var sits = {}; list.forEach(function (a) { var s = situacion(a, t); sits[s] = (sits[s] || 0) + 1; });
+    var hitosOk = DATA.hitos.filter(function (h) { return h.estado === "Cumplido"; }).length;
+    var next = DATA.hitos.filter(function (h) { return h.estado !== "Cumplido"; }).sort(function (a, b) { return d(a.fecha) - d(b.fecha); })[0];
+    var nucleo = DATA.instrumentos.filter(function (i) { return i.nucleo; });
+    var nucOk = nucleo.filter(function (i) { return i.etapa === "Aprobado"; }).length;
+    var allOk = DATA.instrumentos.filter(function (i) { return i.etapa === "Aprobado"; }).length;
+    var riskHi = DATA.riesgos.filter(function (r) { return r.estado === "Activo" && r.prob * r.impacto >= 6; }).length;
+    var gap = pct(pr.plan) - pct(pr.real);
+    var nextDays = next ? Math.round((d(next.fecha) - t) / DAY) : null;
+    var faseActual = DATA.fases.filter(function (f) { return t >= d(f.inicio) && t <= d(f.fin); }).map(function (f) { return f.nombre; }).join(" / ") || (t < d(DATA.fases[0].inicio) ? "Antes del inicio" : "Plan concluido");
+
+    $("kpis").innerHTML = [
+      kpi("Avance real", pct(pr.real) + '<small> %</small>', (gap > 0 ? "Plan esperaba " + pct(pr.plan) + " % · brecha " + gap + " pp" : "En línea o adelantado al plan (" + pct(pr.plan) + " %)"), '<div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)" data-tip="Planificado a la fecha: ' + pct(pr.plan) + ' %"></b></div>'),
+      kpi("Fase en curso", '<span style="font-size:20px">' + esc(faseActual) + "</span>", "Corte: " + fmt(S.corte)),
+      kpi("Actividades", (sits["Completado"] || 0) + "<small> / " + list.length + "</small>", ((sits["Vencido"] || 0) + (sits["Bloqueado"] || 0)) + " vencidas o bloqueadas · " + (sits["En riesgo"] || 0) + " en riesgo"),
+      kpi("Próximo hito", next ? esc(next.id) + '<small> ' + (nextDays >= 0 ? "en " + nextDays + " días" : "atrasado " + (-nextDays) + " días") + "</small>" : "—", next ? esc(next.nombre) + " · " + fmt(next.fecha) + " · " + next.cumplidas.length + "/" + next.condiciones.length + " condiciones" : "Todos cumplidos"),
+      kpi("Hitos cumplidos", hitosOk + "<small> / 8</small>", "Indicador I03 en la pestaña Indicadores"),
+      kpi("Núcleo normativo", nucOk + "<small> / 5</small>", allOk + " de 17 instrumentos aprobados · requisito de H1", '<div class="meter"><i style="width:' + (nucOk / 5 * 100) + '%"></i></div>'),
+      kpi("Riesgos altos activos", riskHi + "<small> / " + DATA.riesgos.length + "</small>", "Probabilidad × impacto ≥ 6")
+    ].join("");
+
+    renderCurva(list);
+    renderPorFase(list);
+
+    var alerts = list.filter(function (a) { var s = situacion(a, t); return s === "Vencido" || s === "Bloqueado" || s === "En riesgo"; })
+      .sort(function (a, b) { return SIT_ORDER.indexOf(situacion(a, t)) - SIT_ORDER.indexOf(situacion(b, t)) || d(a.fin) - d(b.fin); });
+    $("alertas").innerHTML = alerts.length ? alerts.slice(0, 8).map(function (a) { return item(a, situacion(a, t), (t > d(a.fin) ? Math.round((t - d(a.fin)) / DAY) + " d de atraso" : fmt(a.fin))); }).join("") + (alerts.length > 8 ? '<li class="m" style="cursor:default">… y ' + (alerts.length - 8) + ' más (filtre por situación)</li>' : "") : '<li class="empty" style="cursor:default">Sin alertas a la fecha de corte.</li>';
+
+    var prox = list.filter(function (a) { var e = d(a.fin); return e >= t && e <= t + 30 * DAY && a.estado !== "Completado"; }).sort(function (a, b) { return d(a.fin) - d(b.fin); });
+    $("proximos").innerHTML = prox.length ? prox.slice(0, 8).map(function (a) { return item(a, situacion(a, t), fmt(a.fin)); }).join("") : '<li class="empty" style="cursor:default">Nada cierra en los próximos 30 días.</li>';
+
+    $("lectura").innerHTML = lectura(list, pr, sits, next, nextDays, nucOk);
+  }
+  function kpi(label, value, foot, extra) { return '<div class="card kpi"><div class="label">' + label + '</div><div class="value">' + value + "</div>" + (extra || "") + '<div class="foot">' + foot + "</div></div>"; }
+  function item(a, s, right) { return '<li data-open="' + a.id + '"><span>' + statusHTML(s).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(a.nombre) + '</div><div class="m">' + esc(a.id + " · " + (a.responsables || []).join(", ")) + '</div></span><span class="d">' + right + "</span></li>"; }
+
+  function lectura(list, pr, sits, next, nextDays, nucOk) {
+    var t = d(S.corte), out = [];
+    var gap = pct(pr.plan) - pct(pr.real);
+    if (!list.length) return '<p class="empty">No hay actividades con estos filtros.</p>';
+    out.push(gap > 10 ? "El avance real va <b>" + gap + " puntos</b> por debajo de lo planificado." : gap > 0 ? "El avance real está levemente por debajo del plan (" + gap + " pp)." : "El avance real está en línea con el plan.");
+    var venc = (sits["Vencido"] || 0);
+    if (venc) out.push("<b>" + venc + "</b> actividad(es) vencida(s) sin completar; revisar en la próxima sesión de la comisión ocasional.");
+    if (next && nextDays != null && nextDays <= 45) {
+      var pend = next.condiciones.length - next.cumplidas.length;
+      out.push((nextDays < 0 ? "<b>" + next.id + " está atrasado " + (-nextDays) + " días</b>" : "Faltan <b>" + nextDays + " días</b> para " + next.id) + " (" + esc(next.nombre) + ") y quedan <b>" + pend + "</b> condición(es) por cumplir.");
+    }
+    if (t >= d("2027-04-01") && t <= d("2027-08-22") && nucOk < 5) out.push("Estamos en la ventana del núcleo normativo y van <b>" + nucOk + " de 5</b> instrumentos aprobados: riesgo RG01.");
+    var load = {}; list.forEach(function (a) { var s = situacion(a, t); if (s !== "Completado" && s !== "Programado" && s !== "Cancelado") (a.responsables || []).forEach(function (u) { load[u] = (load[u] || 0) + 1; }); });
+    var top = Object.keys(load).sort(function (a, b) { return load[b] - load[a]; })[0];
+    if (top && load[top] >= 3) out.push("<b>" + esc(top) + "</b> concentra " + load[top] + " actividades abiertas a la fecha: vigilar sobrecarga (RG02).");
+    if (countOverrides()) out.push("Hay cambios locales sin exportar; la vista refleja esos cambios.");
+    return out.map(function (x) { return "<p style='margin:0 0 8px'>" + x + "</p>"; }).join("");
+  }
+
+  function renderCurva(list) {
+    var W = 560, H = 220, L = 34, R = 12, T = 12, B = 26;
+    var t0 = d("2026-10-01"), t1 = d("2030-12-31"), tc = d(S.corte);
+    function X(t) { return L + (t - t0) / (t1 - t0) * (W - L - R); }
+    function Y(v) { return T + (1 - v) * (H - T - B); }
+    var pts = [];
+    for (var y = 2026, m = 9; y < 2031; m++) { if (m > 11) { m = 0; y++; if (y > 2030) break; } var t = Date.UTC(y, m + 1, 0); pts.push([t, progressAt(list, t).plan]); }
+    var plan = pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("");
+    var hist = (DATA.historial || []).map(function (h) { return [d(h.fecha), h.real / 100]; });
+    var nowT = d(todayISO());
+    hist.push([nowT, progressAt(list, nowT).real]);
+    hist.sort(function (a, b) { return a[0] - b[0]; });
+    var realP = hist.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("");
+    var g = "";
+    [0, .25, .5, .75, 1].forEach(function (v) { g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--grid)"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v * 100 + "</text>"; });
+    for (var yr = 2027; yr <= 2030; yr++) { var tx = X(Date.UTC(yr, 0, 1)); g += '<line x1="' + tx + '" x2="' + tx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--grid)"/><text x="' + (tx + 4) + '" y="' + (H - 8) + '">' + yr + "</text>"; }
+    var hits = pts.map(function (p) { var pr = progressAt(list, p[0]); return '<rect x="' + (X(p[0]) - 5) + '" y="' + T + '" width="10" height="' + (H - T - B) + '" fill="transparent" data-tip="' + MES[new Date(p[0]).getUTCMonth()] + " " + new Date(p[0]).getUTCFullYear() + "<br>Planificado: " + pct(pr.plan) + ' %"/>'; }).join("");
+    var cv = progressAt(list, tc);
+    $("curvaS").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="Curva S: planificado ' + pct(cv.plan) + ' %, real ' + pct(cv.real) + ' % a la fecha de corte">' + g +
+      '<path d="' + plan + '" fill="none" stroke="var(--axis)" stroke-width="2"/>' +
+      '<path d="' + realP + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' +
+      hist.map(function (p) { return '<circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" data-tip="Real ' + fmt(iso(p[0])) + ": " + pct(p[1]) + ' %"/>'; }).join("") +
+      '<line x1="' + X(tc) + '" x2="' + X(tc) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--accent)" stroke-dasharray="3 3"/>' +
+      '<circle cx="' + X(tc) + '" cy="' + Y(cv.plan) + '" r="4" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2" data-tip="Planificado al ' + fmt(S.corte) + ": " + pct(cv.plan) + ' %"/>' + hits + "</svg>";
+  }
+
+  function renderPorFase(list) {
+    var t = d(S.corte);
+    var rows = DATA.fases.map(function (f) {
+      var acts = list.filter(function (a) { return a.fase === f.id; }); if (!acts.length) return "";
+      var p = progressAt(acts, t);
+      var done = acts.filter(function (a) { return a.estado === "Completado"; }).length;
+      return '<div style="display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--grid)" data-tip="<b>' + esc(f.nombre) + '</b><br>' + esc(f.proposito) + "<br>Real " + pct(p.real) + " % · Plan " + pct(p.plan) + " %<br>" + done + "/" + acts.length + ' actividades completadas">' +
+        '<span style="font-size:12.5px">' + esc(f.nombre) + '</span><div class="meter" style="margin:0"><i style="width:' + pct(p.real) + '%"></i><b style="left:calc(' + pct(p.plan) + '% - 1px)"></b></div><span class="d" style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums">' + pct(p.real) + " / " + pct(p.plan) + " %</span></div>";
+    }).join("");
+    $("porFase").innerHTML = rows || '<p class="empty">Sin actividades con estos filtros.</p>';
+  }
+
+  // ---------- CRONOGRAMA ----------
+  function zoomRange() {
+    if (S.zoom === "all") return [d("2026-10-01"), d("2031-01-01")];
+    if (S.zoom === "12m") { var c = d(S.corte); return [c - 60 * DAY, c + 305 * DAY]; }
+    var y = +S.zoom; return [Date.UTC(y, 0, 1), Date.UTC(y + 1, 0, 1)];
+  }
+  function renderGantt(list) {
+    var Z = [["all", "2026–2030"], ["12m", "12 meses desde el corte"], ["2026", "2026"], ["2027", "2027"], ["2028", "2028"], ["2029", "2029"], ["2030", "2030"]];
+    $("zoom").innerHTML = Z.map(function (z) { return '<button class="chip" data-z="' + z[0] + '" aria-pressed="' + (S.zoom === z[0]) + '">' + z[1] + "</button>"; }).join("");
+    $("zoom").onclick = function (e) { var b = e.target.closest("button"); if (!b) return; S.zoom = b.dataset.z; renderGantt(filtered()); };
+    $("ganttLegend").innerHTML = SIT_ORDER.slice(0, 7).map(function (s) { return '<span><i class="sw" style="background:' + SIT[s].c + '"></i>' + SIT[s].i + " " + s + "</span>"; }).join("");
+
+    var r = zoomRange(), t0 = r[0], t1 = r[1], span = t1 - t0, t = d(S.corte);
+    function P(x) { return (x - t0) / span * 100; }
+    var ticks = "", short = span < 400 * DAY;
+    var cur = new Date(t0); cur = Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth(), 1);
+    while (cur < t1) {
+      var dt = new Date(cur), mo = dt.getUTCMonth();
+      if (cur >= t0) {
+        if (mo === 0) ticks += '<div class="g-tick major" style="left:' + P(cur) + '%"><span>' + dt.getUTCFullYear() + "</span></div>";
+        else if (short || mo % 3 === 0) ticks += '<div class="g-tick" style="left:' + P(cur) + '%">' + (short || span < 800 * DAY ? "<span>" + MES[mo] + "</span>" : "") + "</div>";
+      }
+      cur = Date.UTC(dt.getUTCFullYear(), mo + 1, 1);
+    }
+    var todayLine = t >= t0 && t <= t1 ? '<div class="g-today" style="left:' + P(t) + '%"><span>Corte ' + fmt(S.corte) + "</span></div>" : "";
+    var ms = DATA.hitos.map(function (h) {
+      var x = d(h.fecha); if (x < t0 || x > t1) return "";
+      var c = h.estado === "Cumplido" ? "var(--good)" : x < t ? "var(--critical)" : "var(--ink)";
+      return '<div class="g-ms" data-hito="' + h.id + '" style="left:' + P(x) + "%;background:" + c + '" data-tip="<b>' + h.id + " · " + esc(h.nombre) + "</b><br>" + fmt(h.fecha) + "<br>Decide: " + esc(h.decide) + "<br>" + h.cumplidas.length + "/" + h.condiciones.length + ' condiciones"></div>';
+    }).join("");
+
+    var html = '<div class="g-row head"><div class="g-label" style="cursor:default;font-weight:600">Actividad (' + list.length + ')</div><div class="g-track">' + ticks + todayLine + "</div></div>";
+    html += '<div class="g-row"><div class="g-label" style="cursor:default;color:var(--ink-2)">Hitos de control H0–H7</div><div class="g-track">' + ticks + ms + todayLine + "</div></div>";
+    DATA.fases.forEach(function (f) {
+      var acts = list.filter(function (a) { return a.fase === f.id; });
+      if (!acts.length) return;
+      var fs = Math.max(d(f.inicio), t0), fe = Math.min(d(f.fin) + DAY, t1);
+      var pb = fe > fs ? '<div class="g-phase" style="left:' + P(fs) + "%;width:" + (P(fe) - P(fs)) + '%"></div>' : "";
+      html += '<div class="g-row phase"><div class="g-label" style="cursor:default" title="' + esc(f.proposito) + '">' + esc(f.nombre) + " · " + fmt(f.inicio) + " – " + fmt(f.fin) + '</div><div class="g-track">' + ticks + pb + todayLine + "</div></div>";
+      acts.sort(function (a, b) { return d(a.inicio) - d(b.inicio); }).forEach(function (a) {
+        var s = Math.max(d(a.inicio), t0), e = Math.min(d(a.fin) + DAY, t1), sit = situacion(a, t);
+        var bar = e > s ? '<div class="g-bar' + (a.critica ? " crit" : "") + '" data-open="' + a.id + '" style="left:' + P(s) + "%;width:" + (P(e) - P(s)) + "%;background:" + SIT[sit].c + '" data-tip="' + esc(actTip(a)) + '"><i style="width:' + pct(real(a)) + '%"></i></div>' : "";
+        html += '<div class="g-row"><div class="g-label" data-open="' + a.id + '" title="' + esc(a.nombre) + '"><span class="id">' + esc(a.id) + "</span>" + esc(a.nombre) + '</div><div class="g-track">' + ticks + bar + todayLine + "</div></div>";
+      });
+    });
+    $("gantt").innerHTML = html;
+  }
+
+  // ---------- HITOS ----------
+  function renderHitos() {
+    var t = d(S.corte);
+    $("hitosGrid").innerHTML = DATA.hitos.map(function (h) {
+      var acts = DATA.actividades.filter(function (a) { return a.hito === h.id; });
+      var pr = progressAt(acts, t), days = Math.round((d(h.fecha) - t) / DAY);
+      var st = h.estado === "Cumplido" ? "Completado" : days < 0 ? "Vencido" : h.cumplidas.length < h.condiciones.length && days <= 30 ? "En riesgo" : days <= 90 ? "En curso" : "Programado";
+      var lbl = h.estado === "Cumplido" ? "Cumplido" + (h.fechaReal ? " el " + fmt(h.fechaReal) : "") : days < 0 ? "Atrasado " + (-days) + " días" : "Faltan " + days + " días";
+      return '<div class="card hito"><div class="hd"><span class="code">' + h.id + '</span>' + statusHTML(st).replace(/>[^<]*<\/span>$/, ">" + SIT[st].i + " " + lbl + "</span>") + "</div>" +
+        "<div><b>" + esc(h.nombre) + '</b><div class="days">' + fmt(h.fecha) + " · Decide: " + esc(h.decide) + "</div></div>" +
+        "<ul>" + h.condiciones.map(function (c, i) { var ok = h.cumplidas.indexOf(i) >= 0; return '<li><input type="checkbox" data-h="' + h.id + '" data-i="' + i + '"' + (ok ? " checked" : "") + (S.edit ? "" : " disabled") + ' aria-label="' + esc(c) + '"><span' + (ok ? ' style="color:var(--muted);text-decoration:line-through"' : "") + ">" + esc(c) + "</span></li>"; }).join("") + "</ul>" +
+        (acts.length ? '<div class="days">Actividades que alimentan el hito: ' + acts.length + " · avance " + pct(pr.real) + " % (plan " + pct(pr.plan) + ' %)</div><div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)"></b></div>' : "") +
+        (S.edit ? '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" data-hstate="' + h.id + '">' + (h.estado === "Cumplido" ? "Marcar pendiente" : "Declarar cumplido") + "</button></div>" : "") + "</div>";
+    }).join("");
+  }
+  $("hitosGrid").addEventListener("change", function (e) {
+    var cb = e.target; if (!cb.dataset.h) return;
+    var h = DATA.hitos.filter(function (x) { return x.id === cb.dataset.h; })[0], i = +cb.dataset.i;
+    var arr = h.cumplidas.filter(function (x) { return x !== i; }); if (cb.checked) arr.push(i); arr.sort();
+    setOverride("hitos", h.id, { cumplidas: arr });
+  });
+  $("hitosGrid").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-hstate]"); if (!b) return;
+    var h = DATA.hitos.filter(function (x) { return x.id === b.dataset.hstate; })[0];
+    setOverride("hitos", h.id, h.estado === "Cumplido" ? { estado: "Pendiente", fechaReal: null } : { estado: "Cumplido", fechaReal: S.corte, cumplidas: h.condiciones.map(function (_, i) { return i; }) });
+  });
+
+  // ---------- NORMATIVA ----------
+  var ETAPAS = ["Por iniciar", "Borrador", "Revisión técnica", "En CGA", "En OCS", "Aprobado"];
+  function renderNormativa() {
+    var t = d(S.corte), ins = DATA.instrumentos.filter(function (i) { return !S.nivel || i.nivel === S.nivel; });
+    var late = ins.filter(function (i) { return i.etapa !== "Aprobado" && d(i.plazo) < t; }).length;
+    var due = ins.filter(function (i) { return i.etapa !== "Aprobado" && d(i.plazo) >= t; }).sort(function (a, b) { return d(a.plazo) - d(b.plazo); })[0];
+    var acc = {}; ins.forEach(function (i) { acc[i.accion] = (acc[i.accion] || 0) + 1; });
+    $("normKpis").innerHTML = [
+      kpi("Aprobados", ins.filter(function (i) { return i.etapa === "Aprobado"; }).length + "<small> / " + ins.length + "</small>", Object.keys(acc).map(function (k) { return acc[k] + " " + k.toLowerCase(); }).join(" · ")),
+      kpi("Núcleo (antes de H1)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 1, 2a, 2b, 5 y 6"),
+      kpi("Fuera de plazo", late + "", late ? "Plazo vencido sin aprobación" : "Ninguno a la fecha de corte"),
+      kpi("Siguiente plazo", due ? esc(due.id) : "—", due ? esc(due.nombre) + " · " + fmt(due.plazo) : "")
+    ].join("");
+    $("kanban").innerHTML = ETAPAS.map(function (et) {
+      var cs = ins.filter(function (i) { return i.etapa === et; }).sort(function (a, b) { return d(a.plazo) - d(b.plazo); });
+      return '<div class="col"><h3>' + et + "<span>" + cs.length + "</span></h3>" + cs.map(function (i) {
+        var isLate = et !== "Aprobado" && d(i.plazo) < t;
+        return '<div class="ncard" data-ins="' + i.id + '"><div class="n">' + esc(i.id + ". " + i.nombre) + "</div><div>" + (i.nucleo ? '<span class="tag core">Núcleo</span>' : "") + '<span class="tag">' + esc(i.accion) + '</span><span class="tag">' + esc(i.nivel === "EC" ? "Ed. Continua" : i.nivel) + "</span>" + (isLate ? '<span class="tag late">✕ Vencido</span>' : "") + '</div><div class="r" style="margin-top:4px">Plazo ' + fmt(i.plazo) + "</div></div>";
+      }).join("") + "</div>";
+    }).join("");
+  }
+  $("kanban").addEventListener("click", function (e) { var c = e.target.closest("[data-ins]"); if (c) openInstrumento(c.dataset.ins); });
+
+  // ---------- INDICADORES ----------
+  function calcInd(ind) {
+    var t = d(S.corte);
+    if (ind.calculado === "nucleo") {
+      var prog = DATA.instrumentos.filter(function (i) { return d(i.plazo) <= Math.max(t, d("2027-08-22")) && i.nucleo; });
+      return prog.length ? Math.round(prog.filter(function (i) { return i.etapa === "Aprobado"; }).length / prog.length * 100) : null;
+    }
+    if (ind.calculado === "hitos") {
+      var due = DATA.hitos.filter(function (h) { return d(h.fecha) < t; });
+      if (!due.length) return null;
+      return Math.round(due.filter(function (h) { return h.estado === "Cumplido" && (!h.fechaReal || d(h.fechaReal) <= d(h.fecha)); }).length / due.length * 100);
+    }
+    var m = ind.mediciones || []; return m.length ? m[m.length - 1].valor : null;
+  }
+  function spark(m) {
+    if (!m || m.length < 2) return "";
+    var W = 220, H = 40, vs = m.map(function (x) { return +x.valor; }), lo = Math.min.apply(0, vs), hi = Math.max.apply(0, vs); if (hi === lo) { hi++; lo--; }
+    var pts = vs.map(function (v, i) { return [4 + i / (vs.length - 1) * (W - 8), 4 + (1 - (v - lo) / (hi - lo)) * (H - 8)]; });
+    return '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="40"><path d="' + pts.map(function (p, i) { return (i ? "L" : "M") + p[0] + " " + p[1]; }).join("") + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' + pts.map(function (p, i) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" data-tip="' + esc(m[i].periodo) + ": " + m[i].valor + '"/>'; }).join("") + "</svg>";
+  }
+  function renderIndicadores() {
+    $("indGrid").innerHTML = DATA.indicadores.map(function (ind) {
+      var v = calcInd(ind);
+      var val = v == null ? '<div class="v none">Sin dato · ' + (ind.calculado === "hitos" ? "aún no vence ningún hito" : ind.calculado ? "sin instrumentos programados" : "línea base en julio 2027") + "</div>" : '<div class="v">' + v + ' <small style="font-size:14px;color:var(--ink-2)">' + esc(ind.unidad) + "</small></div>";
+      return '<div class="card ind"><div class="fam">' + esc(ind.id + " · " + ind.familia) + "</div><h2 style=\"margin-top:4px\">" + esc(ind.nombre) + "</h2>" + val + spark(ind.mediciones) +
+        "<dl><dt>Medición</dt><dd>" + esc(ind.formula) + "</dd><dt>Fuente</dt><dd>" + esc(ind.fuente) + "</dd><dt>Frecuencia</dt><dd>" + esc(ind.frecuencia) + "</dd><dt>Responsable</dt><dd>" + esc(ind.responsable) + "</dd><dt>Meta</dt><dd>" + (ind.meta == null ? "Por definir con línea base" : ind.meta + " " + esc(ind.unidad)) + "</dd></dl>" +
+        (S.edit && !ind.calculado ? '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><input class="search" style="flex:1 1 90px;min-width:0" placeholder="Periodo (2S-2027)" data-per="' + ind.id + '"><input class="search" style="width:80px" type="number" placeholder="Valor" data-val="' + ind.id + '"><button class="btn" data-addm="' + ind.id + '">Agregar</button></div>' : "") + "</div>";
+    }).join("");
+  }
+  $("indGrid").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-addm]"); if (!b) return;
+    var id = b.dataset.addm, per = document.querySelector('[data-per="' + id + '"]').value.trim(), val = document.querySelector('[data-val="' + id + '"]').value;
+    if (!per || val === "") return;
+    var ind = DATA.indicadores.filter(function (x) { return x.id === id; })[0];
+    setOverride("indicadores", id, { mediciones: (ind.mediciones || []).concat([{ periodo: per, valor: +val }]) });
+  });
+
+  // ---------- RIESGOS ----------
+  var NV = ["", "Baja", "Media", "Alta"];
+  function renderRiesgos() {
+    var act = DATA.riesgos.filter(function (r) { return r.estado === "Activo"; }), h = "";
+    for (var p = 3; p >= 1; p--) {
+      h += '<div class="ax">' + NV[p] + "</div>";
+      for (var i = 1; i <= 3; i++) {
+        var n = act.filter(function (r) { return r.prob === p && r.impacto === i; }).length, sc = p * i;
+        var bg = sc >= 9 ? "var(--heat-4)" : sc >= 6 ? "var(--heat-3)" : sc >= 3 ? "var(--heat-2)" : sc >= 2 ? "var(--heat-1)" : "var(--heat-0)";
+        var ink = sc >= 6 ? "#fff" : "var(--ink)";
+        var key = p + "-" + i;
+        h += '<div class="cell" data-cell="' + key + '" aria-pressed="' + (S.riskCell === key) + '" style="background:' + bg + ";color:" + ink + '" data-tip="Probabilidad ' + NV[p] + " · Impacto " + NV[i] + "<br>" + n + ' riesgo(s)"><b>' + n + "</b><span>" + (sc >= 6 ? "Alto" : sc >= 3 ? "Medio" : "Bajo") + "</span></div>";
+      }
+    }
+    h += '<div class="ax"></div><div class="ax">Impacto bajo</div><div class="ax">Impacto medio</div><div class="ax">Impacto alto</div>';
+    $("heat").innerHTML = h;
+    var list = DATA.riesgos.filter(function (r) { if (!S.riskCell) return true; var k = S.riskCell.split("-"); return r.prob === +k[0] && r.impacto === +k[1]; })
+      .sort(function (a, b) { return b.prob * b.impacto - a.prob * a.impacto; });
+    $("riskTitle").textContent = S.riskCell ? "Riesgos de la celda seleccionada (" + list.length + ")" : "Riesgos (" + list.length + ")";
+    $("riskList").innerHTML = list.map(function (r) {
+      var sc = r.prob * r.impacto, st = r.estado === "Activo" ? (sc >= 6 ? "En riesgo" : "En curso") : r.estado === "Materializado" ? "Vencido" : "Completado";
+      return '<li style="cursor:default"><span>' + statusHTML(st).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(r.nombre) + '</div><div class="m">' + esc(r.medida) + " · " + esc(r.responsable) + '</div></span><span class="d">P ' + NV[r.prob] + "<br>I " + NV[r.impacto] + "<br>" +
+        (S.edit ? '<select data-risk="' + r.id + '" aria-label="Estado del riesgo">' + ["Activo", "Mitigado", "Materializado", "Cerrado"].map(function (x) { return "<option" + (x === r.estado ? " selected" : "") + ">" + x + "</option>"; }).join("") + "</select>" : esc(r.estado)) + "</span></li>";
+    }).join("");
+  }
+  $("heat").addEventListener("click", function (e) { var c = e.target.closest("[data-cell]"); if (!c) return; S.riskCell = S.riskCell === c.dataset.cell ? null : c.dataset.cell; renderRiesgos(); });
+  $("riskList").addEventListener("change", function (e) { if (e.target.dataset.risk) setOverride("riesgos", e.target.dataset.risk, { estado: e.target.value }); });
+
+  // ---------- RESPONSABLES ----------
+  function renderCarga(list) {
+    var t = d(S.corte), by = {};
+    list.forEach(function (a) { (a.responsables || []).forEach(function (u) { by[u] = by[u] || {}; var s = situacion(a, t); by[u][s] = (by[u][s] || 0) + 1; }); });
+    var us = Object.keys(by).map(function (u) { var tot = 0; for (var k in by[u]) tot += by[u][k]; return { u: u, tot: tot, c: by[u] }; }).sort(function (a, b) { return b.tot - a.tot; });
+    var max = us.length ? us[0].tot : 1, order = ["Vencido", "Bloqueado", "En riesgo", "Por vencer", "En curso", "Programado", "Completado"];
+    $("cargaChart").innerHTML = us.length ? us.map(function (x) {
+      var segs = order.filter(function (s) { return x.c[s]; }).map(function (s) { return '<span style="display:block;height:100%;width:' + (x.c[s] / max * 100) + "%;background:" + SIT[s].c + ';border-radius:2px;margin-right:2px" data-tip="<b>' + esc(x.u) + "</b><br>" + SIT[s].i + " " + s + ": " + x.c[s] + '"></span>'; }).join("");
+      return '<div style="display:grid;grid-template-columns:120px 1fr 32px;gap:10px;align-items:center;padding:4px 0;cursor:pointer" data-unit="' + esc(x.u) + '" title="' + esc(DATA.siglas[x.u] || x.u) + ' — clic para filtrar"><span style="font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(x.u) + '</span><div style="display:flex;height:14px">' + segs + '</div><span class="d" style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums">' + x.tot + "</span></div>";
+    }).join("") : '<p class="empty">Sin actividades con estos filtros.</p>';
+    $("cargaLegend").innerHTML = order.map(function (s) { return '<span><i class="sw" style="background:' + SIT[s].c + '"></i>' + SIT[s].i + " " + s + "</span>"; }).join("");
+  }
+  $("cargaChart").addEventListener("click", function (e) { var r = e.target.closest("[data-unit]"); if (!r) return; S.resp = r.dataset.unit; $("fResp").value = S.resp; refresh(); });
+
+  // ---------- MATRIZ ----------
+  var COLS = [["id", "ID"], ["fase", "Fase"], ["nombre", "Actividad"], ["responsables", "Responsable"], ["nivel", "Nivel"], ["inicio", "Inicio"], ["fin", "Fin"], ["sit", "Situación"], ["avance", "Avance"], ["producto", "Producto"]];
+  function renderTabla(list) {
+    var t = d(S.corte), k = S.sort.k, dir = S.sort.dir;
+    var rows = list.slice().sort(function (a, b) {
+      var va = k === "sit" ? SIT_ORDER.indexOf(situacion(a, t)) : k === "avance" ? real(a) : k === "inicio" || k === "fin" ? d(a[k]) : String(a[k] || "");
+      var vb = k === "sit" ? SIT_ORDER.indexOf(situacion(b, t)) : k === "avance" ? real(b) : k === "inicio" || k === "fin" ? d(b[k]) : String(b[k] || "");
+      return (va > vb ? 1 : va < vb ? -1 : 0) * dir;
+    });
+    $("tablaSub").textContent = rows.length + " de " + DATA.actividades.length + " actividades · clic en el encabezado para ordenar";
+    $("tabla").innerHTML = "<thead><tr>" + COLS.map(function (c) { return '<th data-k="' + c[0] + '">' + c[1] + (k === c[0] ? (dir > 0 ? " ↑" : " ↓") : "") + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function (a) { return '<tr data-open="' + a.id + '"><td>' + esc(a.id) + "</td><td>" + esc(a.fase) + "</td><td>" + esc(a.nombre) + (a.critica ? ' <span class="tag core">Crítica</span>' : "") + "</td><td>" + esc((a.responsables || []).join(", ")) + "</td><td>" + esc(a.nivel) + '</td><td class="num">' + a.inicio + '</td><td class="num">' + a.fin + "</td><td>" + statusHTML(situacion(a, t)) + '</td><td class="num">' + pct(real(a)) + " %</td><td>" + esc(a.producto) + "</td></tr>"; }).join("") + "</tbody>";
+  }
+  $("tabla").addEventListener("click", function (e) { var th = e.target.closest("th"); if (!th) return; var k = th.dataset.k; S.sort = { k: k, dir: S.sort.k === k ? -S.sort.dir : 1 }; renderTabla(filtered()); });
+  $("csv").onclick = function () {
+    var t = d(S.corte), list = filtered();
+    var head = ["id", "fase", "componente", "actividad", "responsables", "participan", "nivel", "inicio", "fin", "estado", "situacion", "avance", "producto", "evidencia", "nota"];
+    var lines = [head.join(";")].concat(list.map(function (a) { return [a.id, a.fase, a.componente, a.nombre, (a.responsables || []).join(", "), (a.participan || []).join(", "), a.nivel, a.inicio, a.fin, a.estado, situacion(a, t), pct(real(a)), a.producto, a.evidencia || "", a.nota || ""].map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(";"); }));
+    download("matriz_operativa_" + S.corte + ".csv", "﻿" + lines.join("\n"), "text/csv");
+  };
+
+  // ---------- panel de detalle ----------
+  function openDrawer(html) { $("drawerBody").innerHTML = html; $("drawer").classList.add("open"); $("scrim").classList.add("open"); $("drawer").setAttribute("aria-hidden", "false"); }
+  function closeDrawer() { $("drawer").classList.remove("open"); $("scrim").classList.remove("open"); $("drawer").setAttribute("aria-hidden", "true"); }
+  $("closeDrawer").onclick = closeDrawer; $("scrim").onclick = closeDrawer;
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDrawer(); });
+
+  function sig(list) { return (list || []).map(function (u) { return '<abbr title="' + esc(DATA.siglas[u] || u) + '">' + esc(u) + "</abbr>"; }).join(", ") || "—"; }
+  function openActividad(id) {
+    var a = DATA.actividades.filter(function (x) { return x.id === id; })[0]; if (!a) return;
+    var t = d(S.corte), f = DATA.fases.filter(function (x) { return x.id === a.fase; })[0];
+    var html = '<div class="m" style="color:var(--muted);font-size:12px">' + esc(a.id + " · " + f.nombre + " · " + a.componente) + "</div><h2>" + esc(a.nombre) + "</h2>" + statusHTML(situacion(a, t)) +
+      '<dl style="margin-top:14px"><dt>Periodo</dt><dd>' + fmt(a.inicio) + " → " + fmt(a.fin) + " (" + weight(a) + " días)</dd><dt>Responsable</dt><dd>" + sig(a.responsables) + "</dd><dt>Participan</dt><dd>" + sig(a.participan) + "</dd><dt>Nivel</dt><dd>" + esc(a.nivel) + "</dd><dt>Producto</dt><dd>" + esc(a.producto) + "</dd>" +
+      (a.hito ? "<dt>Hito</dt><dd>" + esc(a.hito) + "</dd>" : "") + (a.instrumento ? "<dt>Instrumento</dt><dd>N.º " + esc(a.instrumento) + " (Tabla 9)</dd>" : "") +
+      "<dt>Avance</dt><dd>" + pct(real(a)) + " % real · " + pct(planned(a, t)) + " % esperado a la fecha</dd>" +
+      "<dt>Evidencia</dt><dd>" + (a.evidencia ? '<a href="' + esc(a.evidencia) + '" target="_blank" rel="noopener">Abrir evidencia</a>' : "—") + "</dd><dt>Nota</dt><dd>" + esc(a.nota || "—") + "</dd><dt>Actualizado</dt><dd>" + (a.actualizado ? fmt(a.actualizado) : "—") + (a.actualizadoPor ? " · " + esc(a.actualizadoPor) : "") + "</dd></dl>";
+    if (S.edit) {
+      html += '<div class="edit"><b style="font-size:13px">Actualizar seguimiento</b>' +
+        '<label>Estado<select id="eEstado">' + ["No iniciado", "En curso", "Completado", "Bloqueado", "Cancelado"].map(function (x) { return "<option" + (x === a.estado ? " selected" : "") + ">" + x + "</option>"; }).join("") + "</select></label>" +
+        '<label>Avance: <output id="eAvOut">' + (+a.avance || 0) + ' %</output><input id="eAvance" type="range" min="0" max="100" step="5" value="' + (+a.avance || 0) + '"></label>' +
+        '<label>Enlace a la evidencia (resolución, acta, informe)<input id="eEvid" type="url" value="' + esc(a.evidencia || "") + '" placeholder="https://"></label>' +
+        '<label>Nota o justificación<textarea id="eNota" rows="3">' + esc(a.nota || "") + "</textarea></label>" +
+        '<label>Actualizado por<input id="ePor" value="' + esc(a.actualizadoPor || "") + '" placeholder="Unidad o persona"></label>' +
+        '<button class="btn primary" id="eSave">Guardar</button></div>';
+    } else html += '<p class="note">Active "Modo edición" para actualizar el estado, el avance y la evidencia.</p>';
+    openDrawer(html);
+    if (S.edit) {
+      $("eAvance").oninput = function () { $("eAvOut").textContent = this.value + " %"; };
+      $("eEstado").onchange = function () { if (this.value === "Completado") { $("eAvance").value = 100; $("eAvOut").textContent = "100 %"; } };
+      $("eSave").onclick = function () { setOverride("actividades", a.id, { estado: $("eEstado").value, avance: +$("eAvance").value, evidencia: $("eEvid").value.trim(), nota: $("eNota").value.trim(), actualizadoPor: $("ePor").value.trim() }); openActividad(a.id); };
+    }
+  }
+  function openInstrumento(id) {
+    var i = DATA.instrumentos.filter(function (x) { return x.id === id; })[0];
+    var acts = DATA.actividades.filter(function (a) { return a.instrumento === id; });
+    var html = '<div style="color:var(--muted);font-size:12px">Instrumento N.º ' + esc(i.id) + " · " + esc(i.accion) + "</div><h2>" + esc(i.nombre) + "</h2>" + (i.nucleo ? '<span class="tag core">Núcleo normativo</span>' : "") +
+      '<dl style="margin-top:14px"><dt>Etapa</dt><dd>' + esc(i.etapa) + "</dd><dt>Ruta</dt><dd>" + esc(i.ruta) + "</dd><dt>Plazo</dt><dd>" + fmt(i.plazo) + "</dd><dt>Nivel</dt><dd>" + esc(i.nivel) + "</dd><dt>Resolución</dt><dd>" + (i.resolucion ? esc(i.resolucion) : "—") + "</dd>" +
+      (acts.length ? "<dt>Actividad</dt><dd>" + acts.map(function (a) { return '<a href="#" data-open="' + a.id + '">' + esc(a.id) + "</a>"; }).join(", ") + "</dd>" : "") + "</dl>";
+    if (S.edit) html += '<div class="edit"><label>Mover a la etapa<select id="iEtapa">' + ETAPAS.map(function (x) { return "<option" + (x === i.etapa ? " selected" : "") + ">" + x + "</option>"; }).join("") + '</select></label><label>N.º de resolución<input id="iRes" value="' + esc(i.resolucion || "") + '" placeholder="OCS-SO-…"></label><button class="btn primary" id="iSave">Guardar</button></div>';
+    openDrawer(html);
+    if (S.edit) $("iSave").onclick = function () { setOverride("instrumentos", i.id, { etapa: $("iEtapa").value, resolucion: $("iRes").value.trim() }); openInstrumento(i.id); };
+  }
+  document.addEventListener("click", function (e) {
+    var o = e.target.closest("[data-open]"); if (o) { e.preventDefault(); openActividad(o.dataset.open); return; }
+    var h = e.target.closest("[data-hito]"); if (h) { S.tab = "hitos"; buildTabs(); refresh(); }
+  });
+
+  // ---------- exportar ----------
+  function download(name, text, type) { var b = new Blob([text], { type: type }), u = URL.createObjectURL(b), l = document.createElement("a"); l.href = u; l.download = name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000); }
+  $("exportData").onclick = function () {
+    var out = merged(), now = todayISO(), p = progressAt(out.actividades, d(now));
+    out.meta.corte = now;
+    out.historial = (out.historial || []).filter(function (h) { return h.fecha !== now; }).concat([{ fecha: now, real: pct(p.real), plan: pct(p.plan) }]);
+    var txt = "/*\n * Datos del Tablero de Seguimiento del Plan de Implementación del Modelo Educativo UNEMI 2027–2030.\n * Exportado desde el tablero el " + now + ". Reemplace dashboard/data.js con este archivo y registre el cambio en el repositorio.\n */\nwindow.PLAN_DATA = " + JSON.stringify(out, null, 2) + ";\n";
+    download("data.js", txt, "text/javascript");
+  };
+  $("discard").onclick = function () { overrides = { actividades: {}, hitos: {}, instrumentos: {}, riesgos: {}, indicadores: {} }; store(false, overrides); refresh(); };
+
+  // ---------- controles ----------
+  function fillSelects() {
+    $("fFase").innerHTML = '<option value="">Todas las fases</option>' + BASE.fases.map(function (f) { return '<option value="' + f.id + '">' + esc(f.nombre) + "</option>"; }).join("");
+    var us = {}; BASE.actividades.forEach(function (a) { units(a).forEach(function (u) { us[u] = 1; }); });
+    $("fResp").innerHTML = '<option value="">Todas las unidades</option>' + Object.keys(us).sort().map(function (u) { return '<option value="' + esc(u) + '">' + esc(u) + (BASE.siglas[u] ? " · " + esc(BASE.siglas[u]) : "") + "</option>"; }).join("");
+    $("fSit").innerHTML = '<option value="">Toda situación</option>' + SIT_ORDER.map(function (s) { return "<option>" + s + "</option>"; }).join("");
+  }
+  function bind() {
+    $("corte").value = S.corte;
+    $("corte").onchange = function () { if (this.value) { S.corte = this.value; refresh(); } };
+    $("hoy").onclick = function () { S.corte = todayISO(); $("corte").value = S.corte; refresh(); };
+    $("q").oninput = function () { S.q = this.value; refresh(); };
+    $("fFase").onchange = function () { S.fase = this.value; refresh(); };
+    $("fNivel").onchange = function () { S.nivel = this.value; refresh(); };
+    $("fResp").onchange = function () { S.resp = this.value; refresh(); };
+    $("fSit").onchange = function () { S.sit = this.value; refresh(); };
+    $("fCrit").onclick = function () { S.crit = !S.crit; this.setAttribute("aria-pressed", S.crit); refresh(); };
+    $("clear").onclick = function () { S.q = S.fase = S.nivel = S.resp = S.sit = ""; S.crit = false; ["q", "fFase", "fNivel", "fResp", "fSit"].forEach(function (k) { $(k).value = ""; }); $("fCrit").setAttribute("aria-pressed", "false"); refresh(); };
+    $("editToggle").onclick = function () { S.edit = !S.edit; this.classList.toggle("on", S.edit); this.setAttribute("aria-pressed", S.edit); refresh(); };
+    $("theme").onclick = function () {
+      var cur = document.documentElement.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      var nx = cur === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nx); try { localStorage.setItem("unemi-theme", nx); } catch (e) {}
+    };
+  }
+
+  function refresh() {
+    DATA = merged();
+    var list = filtered();
+    $("subtitle").textContent = BASE.meta.titulo + " · v" + BASE.meta.version + " · datos al " + fmt(BASE.meta.corte);
+    $("filterNote").textContent = anyFilter() ? list.length + " de " + DATA.actividades.length + " actividades" : DATA.actividades.length + " actividades · 8 hitos · 17 instrumentos";
+    var n = countOverrides();
+    $("banner").classList.toggle("show", n > 0 || S.edit);
+    $("bannerText").innerHTML = n ? "<b>" + n + " cambio(s) locales</b> guardados solo en este navegador. Exporte <code>data.js</code> y súbalo al repositorio para que los vea el equipo." : "Modo edición activo: los cambios se guardan en este navegador hasta exportarlos.";
+    if (S.tab === "resumen") renderResumen(list);
+    if (S.tab === "cronograma") renderGantt(list);
+    if (S.tab === "hitos") renderHitos();
+    if (S.tab === "normativa") renderNormativa();
+    if (S.tab === "indicadores") renderIndicadores();
+    if (S.tab === "riesgos") renderRiesgos();
+    if (S.tab === "responsables") renderCarga(list);
+    if (S.tab === "datos") renderTabla(list);
+  }
+
+  try { var th = localStorage.getItem("unemi-theme"); if (th) document.documentElement.setAttribute("data-theme", th); var tb = localStorage.getItem("unemi-tab"); if (tb) S.tab = tb; } catch (e) {}
+  fillSelects(); bind(); buildTabs(); refresh();
+})();
+</script>
+</body>
+</html>
