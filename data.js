@@ -15,7 +15,7 @@ window.PLAN_DATA = {
     version: "1.2",
     corte: "2026-10-26",
     horizonte: ["2026-10-01", "2030-12-31"],
-    proponente: "VAFG · Dirección de Innovación de Procesos Académicos"
+    proponente: "VAFG - Dirección de Innovación de Procesos Académicos"
   },
 
   fases: [
@@ -182,7 +182,7 @@ window.PLAN_DATA = {
     { id: "I16", familia: "Tecnología y datos", nombre: "Cobertura de registro de evidencias", formula: "Evidencias del Eje 2 registradas / previstas × 100", fuente: "Módulo del SGA", frecuencia: "Por periodo", responsable: "DTIC, DIPA", unidad: "%", meta: null, mediciones: [] }
   ],
 
-  // Tabla 28. prob/impacto: 1 Baja · 2 Media · 3 Alta. estado: Activo | Mitigado | Materializado | Cerrado
+  // Tabla 28. prob/impacto: 1 Baja - 2 Media - 3 Alta. estado: Activo | Mitigado | Materializado | Cerrado
   riesgos: [
     { id: "RG01", nombre: "El núcleo normativo no se aprueba antes de agosto de 2027", prob: 2, impacto: 3, medida: "Fase 0; núcleo reducido a 4 instrumentos; aprobaciones en enero–febrero, fuera de marzo.", responsable: "VAFG, DAC", estado: "Activo" },
     { id: "RG02", nombre: "Sobrecarga de las unidades por ejecutar el Plan sin presupuesto", prob: 3, impacto: 3, medida: "Capacidad instalada; prioridad al núcleo y al piloto; escalamiento según capacidad.", responsable: "Comisión, DPI", estado: "Activo" },

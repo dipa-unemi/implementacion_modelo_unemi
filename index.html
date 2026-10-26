@@ -255,7 +255,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       </div>
       <div class="card">
         <h2>Avance por fase</h2>
-        <p class="sub">Barra: avance real · Marca: lo que debería llevarse a la fecha de corte</p>
+        <p class="sub">Barra: avance real - Marca: lo que debería llevarse a la fecha de corte</p>
         <div id="porFase"></div>
       </div>
     </div>
@@ -451,7 +451,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   });
   function actTip(a) {
     var s = situacion(a, d(S.corte));
-    return "<b>" + esc(a.id + " · " + a.nombre) + "</b><br>" + fmt(a.inicio) + " → " + fmt(a.fin) + "<br>" + esc((a.responsables || []).join(", ")) + "<br>" + (SIT[s].i + " " + s) + " · avance " + pct(real(a)) + " % (plan " + pct(planned(a, d(S.corte))) + " %)";
+    return "<b>" + esc(a.id + " - " + a.nombre) + "</b><br>" + fmt(a.inicio) + " → " + fmt(a.fin) + "<br>" + esc((a.responsables || []).join(", ")) + "<br>" + (SIT[s].i + " " + s) + " - avance " + pct(real(a)) + " % (plan " + pct(planned(a, d(S.corte))) + " %)";
   }
 
   // ---------- RESUMEN ----------
@@ -469,12 +469,12 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var faseActual = DATA.fases.filter(function (f) { return t >= d(f.inicio) && t <= d(f.fin); }).map(function (f) { return f.nombre; }).join(" / ") || (t < d(DATA.fases[0].inicio) ? "Antes del inicio" : "Plan concluido");
 
     $("kpis").innerHTML = [
-      kpi("Avance real", pct(pr.real) + '<small> %</small>', (gap > 0 ? "Plan esperaba " + pct(pr.plan) + " % · brecha " + gap + " pp" : "En línea o adelantado al plan (" + pct(pr.plan) + " %)"), '<div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)" data-tip="Planificado a la fecha: ' + pct(pr.plan) + ' %"></b></div>'),
+      kpi("Avance real", pct(pr.real) + '<small> %</small>', (gap > 0 ? "Plan esperaba " + pct(pr.plan) + " % - brecha " + gap + " pp" : "En línea o adelantado al plan (" + pct(pr.plan) + " %)"), '<div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)" data-tip="Planificado a la fecha: ' + pct(pr.plan) + ' %"></b></div>'),
       kpi("Fase en curso", '<span style="font-size:20px">' + esc(faseActual) + "</span>", "Corte: " + fmt(S.corte)),
-      kpi("Actividades", (sits["Completado"] || 0) + "<small> / " + list.length + "</small>", ((sits["Vencido"] || 0) + (sits["Bloqueado"] || 0)) + " vencidas o bloqueadas · " + (sits["En riesgo"] || 0) + " en riesgo"),
-      kpi("Próximo hito", next ? esc(next.id) + '<small> ' + (nextDays >= 0 ? "en " + nextDays + " días" : "atrasado " + (-nextDays) + " días") + "</small>" : "—", next ? esc(next.nombre) + " · " + fmt(next.fecha) + " · " + next.cumplidas.length + "/" + next.condiciones.length + " condiciones" : "Todos cumplidos"),
+      kpi("Actividades", (sits["Completado"] || 0) + "<small> / " + list.length + "</small>", ((sits["Vencido"] || 0) + (sits["Bloqueado"] || 0)) + " vencidas o bloqueadas - " + (sits["En riesgo"] || 0) + " en riesgo"),
+      kpi("Próximo hito", next ? esc(next.id) + '<small> ' + (nextDays >= 0 ? "en " + nextDays + " días" : "atrasado " + (-nextDays) + " días") + "</small>" : "—", next ? esc(next.nombre) + " - " + fmt(next.fecha) + " - " + next.cumplidas.length + "/" + next.condiciones.length + " condiciones" : "Todos cumplidos"),
       kpi("Hitos cumplidos", hitosOk + "<small> / 8</small>", "Indicador I03 en la pestaña Indicadores"),
-      kpi("Núcleo normativo", nucOk + "<small> / 5</small>", allOk + " de 17 instrumentos aprobados · requisito de H1", '<div class="meter"><i style="width:' + (nucOk / 5 * 100) + '%"></i></div>'),
+      kpi("Núcleo normativo", nucOk + "<small> / 5</small>", allOk + " de 17 instrumentos aprobados - requisito de H1", '<div class="meter"><i style="width:' + (nucOk / 5 * 100) + '%"></i></div>'),
       kpi("Riesgos altos activos", riskHi + "<small> / " + DATA.riesgos.length + "</small>", "Probabilidad × impacto ≥ 6")
     ].join("");
 
@@ -491,7 +491,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     $("lectura").innerHTML = lectura(list, pr, sits, next, nextDays, nucOk);
   }
   function kpi(label, value, foot, extra) { return '<div class="card kpi"><div class="label">' + label + '</div><div class="value">' + value + "</div>" + (extra || "") + '<div class="foot">' + foot + "</div></div>"; }
-  function item(a, s, right) { return '<li data-open="' + a.id + '"><span>' + statusHTML(s).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(a.nombre) + '</div><div class="m">' + esc(a.id + " · " + (a.responsables || []).join(", ")) + '</div></span><span class="d">' + right + "</span></li>"; }
+  function item(a, s, right) { return '<li data-open="' + a.id + '"><span>' + statusHTML(s).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(a.nombre) + '</div><div class="m">' + esc(a.id + " - " + (a.responsables || []).join(", ")) + '</div></span><span class="d">' + right + "</span></li>"; }
 
   function lectura(list, pr, sits, next, nextDays, nucOk) {
     var t = d(S.corte), out = [];
@@ -544,7 +544,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       var acts = list.filter(function (a) { return a.fase === f.id; }); if (!acts.length) return "";
       var p = progressAt(acts, t);
       var done = acts.filter(function (a) { return a.estado === "Completado"; }).length;
-      return '<div style="display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--grid)" data-tip="<b>' + esc(f.nombre) + '</b><br>' + esc(f.proposito) + "<br>Real " + pct(p.real) + " % · Plan " + pct(p.plan) + " %<br>" + done + "/" + acts.length + ' actividades completadas">' +
+      return '<div style="display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--grid)" data-tip="<b>' + esc(f.nombre) + '</b><br>' + esc(f.proposito) + "<br>Real " + pct(p.real) + " % - Plan " + pct(p.plan) + " %<br>" + done + "/" + acts.length + ' actividades completadas">' +
         '<span style="font-size:12.5px">' + esc(f.nombre) + '</span><div class="meter" style="margin:0"><i style="width:' + pct(p.real) + '%"></i><b style="left:calc(' + pct(p.plan) + '% - 1px)"></b></div><span class="d" style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums">' + pct(p.real) + " / " + pct(p.plan) + " %</span></div>";
     }).join("");
     $("porFase").innerHTML = rows || '<p class="empty">Sin actividades con estos filtros.</p>';
@@ -578,7 +578,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var ms = DATA.hitos.map(function (h) {
       var x = d(h.fecha); if (x < t0 || x > t1) return "";
       var c = h.estado === "Cumplido" ? "var(--good)" : x < t ? "var(--critical)" : "var(--ink)";
-      return '<div class="g-ms" data-hito="' + h.id + '" style="left:' + P(x) + "%;background:" + c + '" data-tip="<b>' + h.id + " · " + esc(h.nombre) + "</b><br>" + fmt(h.fecha) + "<br>Decide: " + esc(h.decide) + "<br>" + h.cumplidas.length + "/" + h.condiciones.length + ' condiciones"></div>';
+      return '<div class="g-ms" data-hito="' + h.id + '" style="left:' + P(x) + "%;background:" + c + '" data-tip="<b>' + h.id + " - " + esc(h.nombre) + "</b><br>" + fmt(h.fecha) + "<br>Decide: " + esc(h.decide) + "<br>" + h.cumplidas.length + "/" + h.condiciones.length + ' condiciones"></div>';
     }).join("");
 
     var html = '<div class="g-row head"><div class="g-label" style="cursor:default;font-weight:600">Actividad (' + list.length + ')</div><div class="g-track">' + ticks + todayLine + "</div></div>";
@@ -588,7 +588,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       if (!acts.length) return;
       var fs = Math.max(d(f.inicio), t0), fe = Math.min(d(f.fin) + DAY, t1);
       var pb = fe > fs ? '<div class="g-phase" style="left:' + P(fs) + "%;width:" + (P(fe) - P(fs)) + '%"></div>' : "";
-      html += '<div class="g-row phase"><div class="g-label" style="cursor:default" title="' + esc(f.proposito) + '">' + esc(f.nombre) + " · " + fmt(f.inicio) + " – " + fmt(f.fin) + '</div><div class="g-track">' + ticks + pb + todayLine + "</div></div>";
+      html += '<div class="g-row phase"><div class="g-label" style="cursor:default" title="' + esc(f.proposito) + '">' + esc(f.nombre) + " - " + fmt(f.inicio) + " – " + fmt(f.fin) + '</div><div class="g-track">' + ticks + pb + todayLine + "</div></div>";
       acts.sort(function (a, b) { return d(a.inicio) - d(b.inicio); }).forEach(function (a) {
         var s = Math.max(d(a.inicio), t0), e = Math.min(d(a.fin) + DAY, t1), sit = situacion(a, t);
         var bar = e > s ? '<div class="g-bar' + (a.critica ? " crit" : "") + '" data-open="' + a.id + '" style="left:' + P(s) + "%;width:" + (P(e) - P(s)) + "%;background:" + SIT[sit].c + '" data-tip="' + esc(actTip(a)) + '"><i style="width:' + pct(real(a)) + '%"></i></div>' : "";
@@ -607,9 +607,9 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       var st = h.estado === "Cumplido" ? "Completado" : days < 0 ? "Vencido" : h.cumplidas.length < h.condiciones.length && days <= 30 ? "En riesgo" : days <= 90 ? "En curso" : "Programado";
       var lbl = h.estado === "Cumplido" ? "Cumplido" + (h.fechaReal ? " el " + fmt(h.fechaReal) : "") : days < 0 ? "Atrasado " + (-days) + " días" : "Faltan " + days + " días";
       return '<div class="card hito"><div class="hd"><span class="code">' + h.id + '</span>' + statusHTML(st).replace(/>[^<]*<\/span>$/, ">" + SIT[st].i + " " + lbl + "</span>") + "</div>" +
-        "<div><b>" + esc(h.nombre) + '</b><div class="days">' + fmt(h.fecha) + " · Decide: " + esc(h.decide) + "</div></div>" +
+        "<div><b>" + esc(h.nombre) + '</b><div class="days">' + fmt(h.fecha) + " - Decide: " + esc(h.decide) + "</div></div>" +
         "<ul>" + h.condiciones.map(function (c, i) { var ok = h.cumplidas.indexOf(i) >= 0; return '<li><input type="checkbox" data-h="' + h.id + '" data-i="' + i + '"' + (ok ? " checked" : "") + (S.edit ? "" : " disabled") + ' aria-label="' + esc(c) + '"><span' + (ok ? ' style="color:var(--muted);text-decoration:line-through"' : "") + ">" + esc(c) + "</span></li>"; }).join("") + "</ul>" +
-        (acts.length ? '<div class="days">Actividades que alimentan el hito: ' + acts.length + " · avance " + pct(pr.real) + " % (plan " + pct(pr.plan) + ' %)</div><div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)"></b></div>' : "") +
+        (acts.length ? '<div class="days">Actividades que alimentan el hito: ' + acts.length + " - avance " + pct(pr.real) + " % (plan " + pct(pr.plan) + ' %)</div><div class="meter"><i style="width:' + pct(pr.real) + '%"></i><b style="left:calc(' + pct(pr.plan) + '% - 1px)"></b></div>' : "") +
         (S.edit ? '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" data-hstate="' + h.id + '">' + (h.estado === "Cumplido" ? "Marcar pendiente" : "Declarar cumplido") + "</button></div>" : "") + "</div>";
     }).join("");
   }
@@ -633,10 +633,10 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var due = ins.filter(function (i) { return i.etapa !== "Aprobado" && d(i.plazo) >= t; }).sort(function (a, b) { return d(a.plazo) - d(b.plazo); })[0];
     var acc = {}; ins.forEach(function (i) { acc[i.accion] = (acc[i.accion] || 0) + 1; });
     $("normKpis").innerHTML = [
-      kpi("Aprobados", ins.filter(function (i) { return i.etapa === "Aprobado"; }).length + "<small> / " + ins.length + "</small>", Object.keys(acc).map(function (k) { return acc[k] + " " + k.toLowerCase(); }).join(" · ")),
+      kpi("Aprobados", ins.filter(function (i) { return i.etapa === "Aprobado"; }).length + "<small> / " + ins.length + "</small>", Object.keys(acc).map(function (k) { return acc[k] + " " + k.toLowerCase(); }).join(" - ")),
       kpi("Núcleo (antes de H1)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 1, 2a, 2b, 5 y 6"),
       kpi("Fuera de plazo", late + "", late ? "Plazo vencido sin aprobación" : "Ninguno a la fecha de corte"),
-      kpi("Siguiente plazo", due ? esc(due.id) : "—", due ? esc(due.nombre) + " · " + fmt(due.plazo) : "")
+      kpi("Siguiente plazo", due ? esc(due.id) : "—", due ? esc(due.nombre) + " - " + fmt(due.plazo) : "")
     ].join("");
     $("kanban").innerHTML = ETAPAS.map(function (et) {
       var cs = ins.filter(function (i) { return i.etapa === et; }).sort(function (a, b) { return d(a.plazo) - d(b.plazo); });
@@ -671,8 +671,8 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function renderIndicadores() {
     $("indGrid").innerHTML = DATA.indicadores.map(function (ind) {
       var v = calcInd(ind);
-      var val = v == null ? '<div class="v none">Sin dato · ' + (ind.calculado === "hitos" ? "aún no vence ningún hito" : ind.calculado ? "sin instrumentos programados" : "línea base en julio 2027") + "</div>" : '<div class="v">' + v + ' <small style="font-size:14px;color:var(--ink-2)">' + esc(ind.unidad) + "</small></div>";
-      return '<div class="card ind"><div class="fam">' + esc(ind.id + " · " + ind.familia) + "</div><h2 style=\"margin-top:4px\">" + esc(ind.nombre) + "</h2>" + val + spark(ind.mediciones) +
+      var val = v == null ? '<div class="v none">Sin dato - ' + (ind.calculado === "hitos" ? "aún no vence ningún hito" : ind.calculado ? "sin instrumentos programados" : "línea base en julio 2027") + "</div>" : '<div class="v">' + v + ' <small style="font-size:14px;color:var(--ink-2)">' + esc(ind.unidad) + "</small></div>";
+      return '<div class="card ind"><div class="fam">' + esc(ind.id + " - " + ind.familia) + "</div><h2 style=\"margin-top:4px\">" + esc(ind.nombre) + "</h2>" + val + spark(ind.mediciones) +
         "<dl><dt>Medición</dt><dd>" + esc(ind.formula) + "</dd><dt>Fuente</dt><dd>" + esc(ind.fuente) + "</dd><dt>Frecuencia</dt><dd>" + esc(ind.frecuencia) + "</dd><dt>Responsable</dt><dd>" + esc(ind.responsable) + "</dd><dt>Meta</dt><dd>" + (ind.meta == null ? "Por definir con línea base" : ind.meta + " " + esc(ind.unidad)) + "</dd></dl>" +
         (S.edit && !ind.calculado ? '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><input class="search" style="flex:1 1 90px;min-width:0" placeholder="Periodo (2S-2027)" data-per="' + ind.id + '"><input class="search" style="width:80px" type="number" placeholder="Valor" data-val="' + ind.id + '"><button class="btn" data-addm="' + ind.id + '">Agregar</button></div>' : "") + "</div>";
     }).join("");
@@ -696,7 +696,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
         var bg = sc >= 9 ? "var(--heat-4)" : sc >= 6 ? "var(--heat-3)" : sc >= 3 ? "var(--heat-2)" : sc >= 2 ? "var(--heat-1)" : "var(--heat-0)";
         var ink = sc >= 6 ? "#fff" : "var(--ink)";
         var key = p + "-" + i;
-        h += '<div class="cell" data-cell="' + key + '" aria-pressed="' + (S.riskCell === key) + '" style="background:' + bg + ";color:" + ink + '" data-tip="Probabilidad ' + NV[p] + " · Impacto " + NV[i] + "<br>" + n + ' riesgo(s)"><b>' + n + "</b><span>" + (sc >= 6 ? "Alto" : sc >= 3 ? "Medio" : "Bajo") + "</span></div>";
+        h += '<div class="cell" data-cell="' + key + '" aria-pressed="' + (S.riskCell === key) + '" style="background:' + bg + ";color:" + ink + '" data-tip="Probabilidad ' + NV[p] + " - Impacto " + NV[i] + "<br>" + n + ' riesgo(s)"><b>' + n + "</b><span>" + (sc >= 6 ? "Alto" : sc >= 3 ? "Medio" : "Bajo") + "</span></div>";
       }
     }
     h += '<div class="ax"></div><div class="ax">Impacto bajo</div><div class="ax">Impacto medio</div><div class="ax">Impacto alto</div>';
@@ -706,7 +706,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     $("riskTitle").textContent = S.riskCell ? "Riesgos de la celda seleccionada (" + list.length + ")" : "Riesgos (" + list.length + ")";
     $("riskList").innerHTML = list.map(function (r) {
       var sc = r.prob * r.impacto, st = r.estado === "Activo" ? (sc >= 6 ? "En riesgo" : "En curso") : r.estado === "Materializado" ? "Vencido" : "Completado";
-      return '<li style="cursor:default"><span>' + statusHTML(st).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(r.nombre) + '</div><div class="m">' + esc(r.medida) + " · " + esc(r.responsable) + '</div></span><span class="d">P ' + NV[r.prob] + "<br>I " + NV[r.impacto] + "<br>" +
+      return '<li style="cursor:default"><span>' + statusHTML(st).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(r.nombre) + '</div><div class="m">' + esc(r.medida) + " - " + esc(r.responsable) + '</div></span><span class="d">P ' + NV[r.prob] + "<br>I " + NV[r.impacto] + "<br>" +
         (S.edit ? '<select data-risk="' + r.id + '" aria-label="Estado del riesgo">' + ["Activo", "Mitigado", "Materializado", "Cerrado"].map(function (x) { return "<option" + (x === r.estado ? " selected" : "") + ">" + x + "</option>"; }).join("") + "</select>" : esc(r.estado)) + "</span></li>";
     }).join("");
   }
@@ -736,7 +736,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       var vb = k === "sit" ? SIT_ORDER.indexOf(situacion(b, t)) : k === "avance" ? real(b) : k === "inicio" || k === "fin" ? d(b[k]) : String(b[k] || "");
       return (va > vb ? 1 : va < vb ? -1 : 0) * dir;
     });
-    $("tablaSub").textContent = rows.length + " de " + DATA.actividades.length + " actividades · clic en el encabezado para ordenar";
+    $("tablaSub").textContent = rows.length + " de " + DATA.actividades.length + " actividades - clic en el encabezado para ordenar";
     $("tabla").innerHTML = "<thead><tr>" + COLS.map(function (c) { return '<th data-k="' + c[0] + '">' + c[1] + (k === c[0] ? (dir > 0 ? " ↑" : " ↓") : "") + "</th>"; }).join("") + "</tr></thead><tbody>" +
       rows.map(function (a) { return '<tr data-open="' + a.id + '"><td>' + esc(a.id) + "</td><td>" + esc(a.fase) + "</td><td>" + esc(a.nombre) + (a.critica ? ' <span class="tag core">Crítica</span>' : "") + "</td><td>" + esc((a.responsables || []).join(", ")) + "</td><td>" + esc(a.nivel) + '</td><td class="num">' + a.inicio + '</td><td class="num">' + a.fin + "</td><td>" + statusHTML(situacion(a, t)) + '</td><td class="num">' + pct(real(a)) + " %</td><td>" + esc(a.producto) + "</td></tr>"; }).join("") + "</tbody>";
   }
@@ -758,11 +758,11 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function openActividad(id) {
     var a = DATA.actividades.filter(function (x) { return x.id === id; })[0]; if (!a) return;
     var t = d(S.corte), f = DATA.fases.filter(function (x) { return x.id === a.fase; })[0];
-    var html = '<div class="m" style="color:var(--muted);font-size:12px">' + esc(a.id + " · " + f.nombre + " · " + a.componente) + "</div><h2>" + esc(a.nombre) + "</h2>" + statusHTML(situacion(a, t)) +
+    var html = '<div class="m" style="color:var(--muted);font-size:12px">' + esc(a.id + " - " + f.nombre + " - " + a.componente) + "</div><h2>" + esc(a.nombre) + "</h2>" + statusHTML(situacion(a, t)) +
       '<dl style="margin-top:14px"><dt>Periodo</dt><dd>' + fmt(a.inicio) + " → " + fmt(a.fin) + " (" + weight(a) + " días)</dd><dt>Responsable</dt><dd>" + sig(a.responsables) + "</dd><dt>Participan</dt><dd>" + sig(a.participan) + "</dd><dt>Nivel</dt><dd>" + esc(a.nivel) + "</dd><dt>Producto</dt><dd>" + esc(a.producto) + "</dd>" +
       (a.hito ? "<dt>Hito</dt><dd>" + esc(a.hito) + "</dd>" : "") + (a.instrumento ? "<dt>Instrumento</dt><dd>N.º " + esc(a.instrumento) + " (Tabla 9)</dd>" : "") +
-      "<dt>Avance</dt><dd>" + pct(real(a)) + " % real · " + pct(planned(a, t)) + " % esperado a la fecha</dd>" +
-      "<dt>Evidencia</dt><dd>" + (a.evidencia ? '<a href="' + esc(a.evidencia) + '" target="_blank" rel="noopener">Abrir evidencia</a>' : "—") + "</dd><dt>Nota</dt><dd>" + esc(a.nota || "—") + "</dd><dt>Actualizado</dt><dd>" + (a.actualizado ? fmt(a.actualizado) : "—") + (a.actualizadoPor ? " · " + esc(a.actualizadoPor) : "") + "</dd></dl>";
+      "<dt>Avance</dt><dd>" + pct(real(a)) + " % real - " + pct(planned(a, t)) + " % esperado a la fecha</dd>" +
+      "<dt>Evidencia</dt><dd>" + (a.evidencia ? '<a href="' + esc(a.evidencia) + '" target="_blank" rel="noopener">Abrir evidencia</a>' : "—") + "</dd><dt>Nota</dt><dd>" + esc(a.nota || "—") + "</dd><dt>Actualizado</dt><dd>" + (a.actualizado ? fmt(a.actualizado) : "—") + (a.actualizadoPor ? " - " + esc(a.actualizadoPor) : "") + "</dd></dl>";
     if (S.edit) {
       html += '<div class="edit"><b style="font-size:13px">Actualizar seguimiento</b>' +
         '<label>Estado<select id="eEstado">' + ["No iniciado", "En curso", "Completado", "Bloqueado", "Cancelado"].map(function (x) { return "<option" + (x === a.estado ? " selected" : "") + ">" + x + "</option>"; }).join("") + "</select></label>" +
@@ -782,7 +782,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function openInstrumento(id) {
     var i = DATA.instrumentos.filter(function (x) { return x.id === id; })[0];
     var acts = DATA.actividades.filter(function (a) { return a.instrumento === id; });
-    var html = '<div style="color:var(--muted);font-size:12px">Instrumento N.º ' + esc(i.id) + " · " + esc(i.accion) + "</div><h2>" + esc(i.nombre) + "</h2>" + (i.nucleo ? '<span class="tag core">Núcleo normativo</span>' : "") +
+    var html = '<div style="color:var(--muted);font-size:12px">Instrumento N.º ' + esc(i.id) + " - " + esc(i.accion) + "</div><h2>" + esc(i.nombre) + "</h2>" + (i.nucleo ? '<span class="tag core">Núcleo normativo</span>' : "") +
       '<dl style="margin-top:14px"><dt>Etapa</dt><dd>' + esc(i.etapa) + "</dd><dt>Ruta</dt><dd>" + esc(i.ruta) + "</dd><dt>Plazo</dt><dd>" + fmt(i.plazo) + "</dd><dt>Nivel</dt><dd>" + esc(i.nivel) + "</dd><dt>Resolución</dt><dd>" + (i.resolucion ? esc(i.resolucion) : "—") + "</dd>" +
       (acts.length ? "<dt>Actividad</dt><dd>" + acts.map(function (a) { return '<a href="#" data-open="' + a.id + '">' + esc(a.id) + "</a>"; }).join(", ") + "</dd>" : "") + "</dl>";
     if (S.edit) html += '<div class="edit"><label>Mover a la etapa<select id="iEtapa">' + ETAPAS.map(function (x) { return "<option" + (x === i.etapa ? " selected" : "") + ">" + x + "</option>"; }).join("") + '</select></label><label>N.º de resolución<input id="iRes" value="' + esc(i.resolucion || "") + '" placeholder="OCS-SO-…"></label><button class="btn primary" id="iSave">Guardar</button></div>';
@@ -809,7 +809,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function fillSelects() {
     $("fFase").innerHTML = '<option value="">Todas las fases</option>' + BASE.fases.map(function (f) { return '<option value="' + f.id + '">' + esc(f.nombre) + "</option>"; }).join("");
     var us = {}; BASE.actividades.forEach(function (a) { units(a).forEach(function (u) { us[u] = 1; }); });
-    $("fResp").innerHTML = '<option value="">Todas las unidades</option>' + Object.keys(us).sort().map(function (u) { return '<option value="' + esc(u) + '">' + esc(u) + (BASE.siglas[u] ? " · " + esc(BASE.siglas[u]) : "") + "</option>"; }).join("");
+    $("fResp").innerHTML = '<option value="">Todas las unidades</option>' + Object.keys(us).sort().map(function (u) { return '<option value="' + esc(u) + '">' + esc(u) + (BASE.siglas[u] ? " - " + esc(BASE.siglas[u]) : "") + "</option>"; }).join("");
     $("fSit").innerHTML = '<option value="">Toda situación</option>' + SIT_ORDER.map(function (s) { return "<option>" + s + "</option>"; }).join("");
   }
   function bind() {
@@ -833,8 +833,8 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function refresh() {
     DATA = merged();
     var list = filtered();
-    $("subtitle").textContent = BASE.meta.titulo + " · v" + BASE.meta.version + " · datos al " + fmt(BASE.meta.corte);
-    $("filterNote").textContent = anyFilter() ? list.length + " de " + DATA.actividades.length + " actividades" : DATA.actividades.length + " actividades · 8 hitos · 17 instrumentos";
+    $("subtitle").textContent = BASE.meta.titulo + " - v" + BASE.meta.version + " - datos al " + fmt(BASE.meta.corte);
+    $("filterNote").textContent = anyFilter() ? list.length + " de " + DATA.actividades.length + " actividades" : DATA.actividades.length + " actividades - 8 hitos - 17 instrumentos";
     var n = countOverrides();
     $("banner").classList.toggle("show", n > 0 || S.edit);
     $("bannerText").innerHTML = n ? "<b>" + n + " cambio(s) locales</b> guardados solo en este navegador. Exporte <code>data.js</code> y súbalo al repositorio para que los vea el equipo." : "Modo edición activo: los cambios se guardan en este navegador hasta exportarlos.";
