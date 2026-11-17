@@ -208,7 +208,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     <div class="top-row">
       <div class="brand">
         <h1>Seguimiento del Modelo Educativo UNEMI 2026</h1>
-        <p id="subtitle">Plan de Implementación 2027–2030</p>
+        <p id="subtitle">Plan de Implementación 2027–2032</p>
       </div>
       <div class="top-actions">
         <label class="ctl" title="Cambie la fecha para ver qué debería estar listo en otro momento">Fecha de corte
@@ -474,7 +474,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       kpi("Actividades", (sits["Completado"] || 0) + "<small> / " + list.length + "</small>", ((sits["Vencido"] || 0) + (sits["Bloqueado"] || 0)) + " vencidas o bloqueadas - " + (sits["En riesgo"] || 0) + " en riesgo"),
       kpi("Próximo hito", next ? esc(next.id) + '<small> ' + (nextDays >= 0 ? "en " + nextDays + " días" : "atrasado " + (-nextDays) + " días") + "</small>" : "—", next ? esc(next.nombre) + " - " + fmt(next.fecha) + " - " + next.cumplidas.length + "/" + next.condiciones.length + " condiciones" : "Todos cumplidos"),
       kpi("Hitos cumplidos", hitosOk + "<small> / 8</small>", "Indicador I03 en la pestaña Indicadores"),
-      kpi("Núcleo normativo", nucOk + "<small> / 5</small>", allOk + " de 17 instrumentos aprobados - requisito de H1", '<div class="meter"><i style="width:' + (nucOk / 5 * 100) + '%"></i></div>'),
+      kpi("Normativa aprobada", allOk + "<small> / " + DATA.instrumentos.length + "</small>", "Requisito de H1 - bloque 1: " + nucOk + " de " + nucleo.length, '<div class="meter"><i style="width:' + (allOk / DATA.instrumentos.length * 100) + '%"></i></div>'),
       kpi("Riesgos altos activos", riskHi + "<small> / " + DATA.riesgos.length + "</small>", "Probabilidad × impacto ≥ 6")
     ].join("");
 
@@ -488,12 +488,12 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var prox = list.filter(function (a) { var e = d(a.fin); return e >= t && e <= t + 30 * DAY && a.estado !== "Completado"; }).sort(function (a, b) { return d(a.fin) - d(b.fin); });
     $("proximos").innerHTML = prox.length ? prox.slice(0, 8).map(function (a) { return item(a, situacion(a, t), fmt(a.fin)); }).join("") : '<li class="empty" style="cursor:default">Nada cierra en los próximos 30 días.</li>';
 
-    $("lectura").innerHTML = lectura(list, pr, sits, next, nextDays, nucOk);
+    $("lectura").innerHTML = lectura(list, pr, sits, next, nextDays, allOk);
   }
   function kpi(label, value, foot, extra) { return '<div class="card kpi"><div class="label">' + label + '</div><div class="value">' + value + "</div>" + (extra || "") + '<div class="foot">' + foot + "</div></div>"; }
   function item(a, s, right) { return '<li data-open="' + a.id + '"><span>' + statusHTML(s).replace(/ [^<]*<\/span>$/, "</span>") + '</span><span><div class="t">' + esc(a.nombre) + '</div><div class="m">' + esc(a.id + " - " + (a.responsables || []).join(", ")) + '</div></span><span class="d">' + right + "</span></li>"; }
 
-  function lectura(list, pr, sits, next, nextDays, nucOk) {
+  function lectura(list, pr, sits, next, nextDays, allOk) {
     var t = d(S.corte), out = [];
     var gap = pct(pr.plan) - pct(pr.real);
     if (!list.length) return '<p class="empty">No hay actividades con estos filtros.</p>';
@@ -504,7 +504,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       var pend = next.condiciones.length - next.cumplidas.length;
       out.push((nextDays < 0 ? "<b>" + next.id + " está atrasado " + (-nextDays) + " días</b>" : "Faltan <b>" + nextDays + " días</b> para " + next.id) + " (" + esc(next.nombre) + ") y quedan <b>" + pend + "</b> condición(es) por cumplir.");
     }
-    if (t >= d("2027-04-01") && t <= d("2027-08-22") && nucOk < 5) out.push("Estamos en la ventana del núcleo normativo y van <b>" + nucOk + " de 5</b> instrumentos aprobados: riesgo RG01.");
+    if (t >= d("2027-01-04") && t <= d("2027-12-17") && allOk < DATA.instrumentos.length) out.push("Estamos en la Fase 1 de habilitación y van <b>" + allOk + " de " + DATA.instrumentos.length + "</b> instrumentos aprobados: riesgo RG01.");
     var load = {}; list.forEach(function (a) { var s = situacion(a, t); if (s !== "Completado" && s !== "Programado" && s !== "Cancelado") (a.responsables || []).forEach(function (u) { load[u] = (load[u] || 0) + 1; }); });
     var top = Object.keys(load).sort(function (a, b) { return load[b] - load[a]; })[0];
     if (top && load[top] >= 3) out.push("<b>" + esc(top) + "</b> concentra " + load[top] + " actividades abiertas a la fecha: vigilar sobrecarga (RG02).");
@@ -514,11 +514,11 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
 
   function renderCurva(list) {
     var W = 560, H = 220, L = 34, R = 12, T = 12, B = 26;
-    var t0 = d("2026-10-01"), t1 = d("2030-12-31"), tc = d(S.corte);
+    var t0 = d("2026-10-01"), t1 = d("2032-12-31"), tc = d(S.corte);
     function X(t) { return L + (t - t0) / (t1 - t0) * (W - L - R); }
     function Y(v) { return T + (1 - v) * (H - T - B); }
     var pts = [];
-    for (var y = 2026, m = 9; y < 2031; m++) { if (m > 11) { m = 0; y++; if (y > 2030) break; } var t = Date.UTC(y, m + 1, 0); pts.push([t, progressAt(list, t).plan]); }
+    for (var y = 2026, m = 9; y < 2033; m++) { if (m > 11) { m = 0; y++; if (y > 2032) break; } var t = Date.UTC(y, m + 1, 0); pts.push([t, progressAt(list, t).plan]); }
     var plan = pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("");
     var hist = (DATA.historial || []).map(function (h) { return [d(h.fecha), h.real / 100]; });
     var nowT = d(todayISO());
@@ -527,7 +527,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var realP = hist.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("");
     var g = "";
     [0, .25, .5, .75, 1].forEach(function (v) { g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--grid)"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v * 100 + "</text>"; });
-    for (var yr = 2027; yr <= 2030; yr++) { var tx = X(Date.UTC(yr, 0, 1)); g += '<line x1="' + tx + '" x2="' + tx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--grid)"/><text x="' + (tx + 4) + '" y="' + (H - 8) + '">' + yr + "</text>"; }
+    for (var yr = 2027; yr <= 2032; yr++) { var tx = X(Date.UTC(yr, 0, 1)); g += '<line x1="' + tx + '" x2="' + tx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--grid)"/><text x="' + (tx + 4) + '" y="' + (H - 8) + '">' + yr + "</text>"; }
     var hits = pts.map(function (p) { var pr = progressAt(list, p[0]); return '<rect x="' + (X(p[0]) - 5) + '" y="' + T + '" width="10" height="' + (H - T - B) + '" fill="transparent" data-tip="' + MES[new Date(p[0]).getUTCMonth()] + " " + new Date(p[0]).getUTCFullYear() + "<br>Planificado: " + pct(pr.plan) + ' %"/>'; }).join("");
     var cv = progressAt(list, tc);
     $("curvaS").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="Curva S: planificado ' + pct(cv.plan) + ' %, real ' + pct(cv.real) + ' % a la fecha de corte">' + g +
@@ -552,12 +552,12 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
 
   // ---------- CRONOGRAMA ----------
   function zoomRange() {
-    if (S.zoom === "all") return [d("2026-10-01"), d("2031-01-01")];
+    if (S.zoom === "all") return [d("2026-10-01"), d("2033-01-01")];
     if (S.zoom === "12m") { var c = d(S.corte); return [c - 60 * DAY, c + 305 * DAY]; }
     var y = +S.zoom; return [Date.UTC(y, 0, 1), Date.UTC(y + 1, 0, 1)];
   }
   function renderGantt(list) {
-    var Z = [["all", "2026–2030"], ["12m", "12 meses desde el corte"], ["2026", "2026"], ["2027", "2027"], ["2028", "2028"], ["2029", "2029"], ["2030", "2030"]];
+    var Z = [["all", "2026–2032"], ["12m", "12 meses desde el corte"], ["2026", "2026"], ["2027", "2027"], ["2028", "2028"], ["2029", "2029"], ["2030", "2030"], ["2031", "2031"], ["2032", "2032"]];
     $("zoom").innerHTML = Z.map(function (z) { return '<button class="chip" data-z="' + z[0] + '" aria-pressed="' + (S.zoom === z[0]) + '">' + z[1] + "</button>"; }).join("");
     $("zoom").onclick = function (e) { var b = e.target.closest("button"); if (!b) return; S.zoom = b.dataset.z; renderGantt(filtered()); };
     $("ganttLegend").innerHTML = SIT_ORDER.slice(0, 7).map(function (s) { return '<span><i class="sw" style="background:' + SIT[s].c + '"></i>' + SIT[s].i + " " + s + "</span>"; }).join("");
@@ -634,7 +634,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var acc = {}; ins.forEach(function (i) { acc[i.accion] = (acc[i.accion] || 0) + 1; });
     $("normKpis").innerHTML = [
       kpi("Aprobados", ins.filter(function (i) { return i.etapa === "Aprobado"; }).length + "<small> / " + ins.length + "</small>", Object.keys(acc).map(function (k) { return acc[k] + " " + k.toLowerCase(); }).join(" - ")),
-      kpi("Núcleo (antes de H1)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 1, 2a, 2b, 5 y 6"),
+      kpi("Bloque 1 (hasta jul 2027)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 2a, 2b, 5 y 6 - todos antes de H1"),
       kpi("Fuera de plazo", late + "", late ? "Plazo vencido sin aprobación" : "Ninguno a la fecha de corte"),
       kpi("Siguiente plazo", due ? esc(due.id) : "—", due ? esc(due.nombre) + " - " + fmt(due.plazo) : "")
     ].join("");
@@ -642,7 +642,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       var cs = ins.filter(function (i) { return i.etapa === et; }).sort(function (a, b) { return d(a.plazo) - d(b.plazo); });
       return '<div class="col"><h3>' + et + "<span>" + cs.length + "</span></h3>" + cs.map(function (i) {
         var isLate = et !== "Aprobado" && d(i.plazo) < t;
-        return '<div class="ncard" data-ins="' + i.id + '"><div class="n">' + esc(i.id + ". " + i.nombre) + "</div><div>" + (i.nucleo ? '<span class="tag core">Núcleo</span>' : "") + '<span class="tag">' + esc(i.accion) + '</span><span class="tag">' + esc(i.nivel === "EC" ? "Ed. Continua" : i.nivel) + "</span>" + (isLate ? '<span class="tag late">✕ Vencido</span>' : "") + '</div><div class="r" style="margin-top:4px">Plazo ' + fmt(i.plazo) + "</div></div>";
+        return '<div class="ncard" data-ins="' + i.id + '"><div class="n">' + esc(i.id + ". " + i.nombre) + "</div><div>" + (i.nucleo ? '<span class="tag core">Bloque 1</span>' : "") + '<span class="tag">' + esc(i.accion) + '</span><span class="tag">' + esc(i.nivel === "EC" ? "Ed. Continua" : i.nivel) + "</span>" + (isLate ? '<span class="tag late">✕ Vencido</span>' : "") + '</div><div class="r" style="margin-top:4px">Plazo ' + fmt(i.plazo) + "</div></div>";
       }).join("") + "</div>";
     }).join("");
   }
@@ -652,7 +652,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function calcInd(ind) {
     var t = d(S.corte);
     if (ind.calculado === "nucleo") {
-      var prog = DATA.instrumentos.filter(function (i) { return d(i.plazo) <= Math.max(t, d("2027-08-22")) && i.nucleo; });
+      var prog = DATA.instrumentos.filter(function (i) { return d(i.plazo) <= Math.max(t, d("2027-12-17")); });
       return prog.length ? Math.round(prog.filter(function (i) { return i.etapa === "Aprobado"; }).length / prog.length * 100) : null;
     }
     if (ind.calculado === "hitos") {
@@ -782,7 +782,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   function openInstrumento(id) {
     var i = DATA.instrumentos.filter(function (x) { return x.id === id; })[0];
     var acts = DATA.actividades.filter(function (a) { return a.instrumento === id; });
-    var html = '<div style="color:var(--muted);font-size:12px">Instrumento N.º ' + esc(i.id) + " - " + esc(i.accion) + "</div><h2>" + esc(i.nombre) + "</h2>" + (i.nucleo ? '<span class="tag core">Núcleo normativo</span>' : "") +
+    var html = '<div style="color:var(--muted);font-size:12px">Instrumento N.º ' + esc(i.id) + " - " + esc(i.accion) + "</div><h2>" + esc(i.nombre) + "</h2>" + (i.nucleo ? '<span class="tag core">Bloque 1 (instrumento de base)</span>' : "") +
       '<dl style="margin-top:14px"><dt>Etapa</dt><dd>' + esc(i.etapa) + "</dd><dt>Ruta</dt><dd>" + esc(i.ruta) + "</dd><dt>Plazo</dt><dd>" + fmt(i.plazo) + "</dd><dt>Nivel</dt><dd>" + esc(i.nivel) + "</dd><dt>Resolución</dt><dd>" + (i.resolucion ? esc(i.resolucion) : "—") + "</dd>" +
       (acts.length ? "<dt>Actividad</dt><dd>" + acts.map(function (a) { return '<a href="#" data-open="' + a.id + '">' + esc(a.id) + "</a>"; }).join(", ") + "</dd>" : "") + "</dl>";
     if (S.edit) html += '<div class="edit"><label>Mover a la etapa<select id="iEtapa">' + ETAPAS.map(function (x) { return "<option" + (x === i.etapa ? " selected" : "") + ">" + x + "</option>"; }).join("") + '</select></label><label>N.º de resolución<input id="iRes" value="' + esc(i.resolucion || "") + '" placeholder="OCS-SO-…"></label><button class="btn primary" id="iSave">Guardar</button></div>';
@@ -800,7 +800,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var out = merged(), now = todayISO(), p = progressAt(out.actividades, d(now));
     out.meta.corte = now;
     out.historial = (out.historial || []).filter(function (h) { return h.fecha !== now; }).concat([{ fecha: now, real: pct(p.real), plan: pct(p.plan) }]);
-    var txt = "/*\n * Datos del Tablero de Seguimiento del Plan de Implementación del Modelo Educativo UNEMI 2027–2030.\n * Exportado desde el tablero el " + now + ". Reemplace dashboard/data.js con este archivo y registre el cambio en el repositorio.\n */\nwindow.PLAN_DATA = " + JSON.stringify(out, null, 2) + ";\n";
+    var txt = "/*\n * Datos del Tablero de Seguimiento del Plan de Implementación del Modelo Educativo UNEMI 2027–2032.\n * Exportado desde el tablero el " + now + ". Reemplace dashboard/data.js con este archivo y registre el cambio en el repositorio.\n */\nwindow.PLAN_DATA = " + JSON.stringify(out, null, 2) + ";\n";
     download("data.js", txt, "text/javascript");
   };
   $("discard").onclick = function () { overrides = { actividades: {}, hitos: {}, instrumentos: {}, riesgos: {}, indicadores: {} }; store(false, overrides); refresh(); };
@@ -834,7 +834,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     DATA = merged();
     var list = filtered();
     $("subtitle").textContent = BASE.meta.titulo + " - v" + BASE.meta.version + " - datos al " + fmt(BASE.meta.corte);
-    $("filterNote").textContent = anyFilter() ? list.length + " de " + DATA.actividades.length + " actividades" : DATA.actividades.length + " actividades - 8 hitos - 17 instrumentos";
+    $("filterNote").textContent = anyFilter() ? list.length + " de " + DATA.actividades.length + " actividades" : DATA.actividades.length + " actividades - 8 hitos - " + DATA.instrumentos.length + " instrumentos";
     var n = countOverrides();
     $("banner").classList.toggle("show", n > 0 || S.edit);
     $("bannerText").innerHTML = n ? "<b>" + n + " cambio(s) locales</b> guardados solo en este navegador. Exporte <code>data.js</code> y súbalo al repositorio para que los vea el equipo." : "Modo edición activo: los cambios se guardan en este navegador hasta exportarlos.";

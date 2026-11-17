@@ -2,7 +2,7 @@
 
 ## 👉 [Abrir el tablero](https://dipa-unemi.github.io/implementacion_modelo_unemi/)
 
-Este tablero permite seguir, en un solo lugar, la implementación del **Modelo Educativo UNEMI 2026 – Socioconstructivista Basado en Competencias**, según el Plan Institucional de Implementación 2027–2030. Muestra qué se debe hacer, quién lo hace, en qué fecha y cómo va cada actividad, desde la aprobación del Plan en noviembre de 2026 hasta la evaluación integral del Modelo en 2030.
+Este tablero permite seguir, en un solo lugar, la implementación del **Modelo Educativo UNEMI 2026 – Socioconstructivista Basado en Competencias**, según el Plan Institucional de Implementación 2027–2032. Muestra qué se debe hacer, quién lo hace, en qué fecha y cómo va cada actividad, desde la aprobación del Plan en noviembre de 2026 hasta la evaluación integral del Modelo en 2032.
 
 Responsable del tablero: Dirección de Innovación de Procesos Académicos (DIPA).
 
@@ -14,26 +14,26 @@ Responsable del tablero: Dirección de Innovación de Procesos Académicos (DIPA
 La vista general del Plan a la fecha:
 - **Avance real** frente al avance que se esperaba a la fecha.
 - **Fase en curso** y **próximo hito**, con los días que faltan y las condiciones pendientes.
-- **Núcleo normativo**: cuántos de los 5 instrumentos que deben aprobarse antes del piloto ya están aprobados.
+- **Normativa aprobada**: cuántos de los 21 instrumentos ya están aprobados. Todos deben estarlo antes del piloto (hito H1, diciembre de 2027).
 - **Riesgos altos** activos.
-- **Curva de avance** 2026–2030: compara lo planificado con lo realmente logrado.
+- **Curva de avance** 2026–2032: compara lo planificado con lo realmente logrado.
 - **Avance por fase**, **alertas** (actividades vencidas o atrasadas) y **entregas de los próximos 30 días**.
 - **Lectura del momento**: un párrafo que resume la situación y señala lo que requiere atención.
 
 ### Cronograma
-La hoja de ruta completa en un diagrama de barras por fase, con los ocho hitos de control (H0 a H7) y una línea que marca la fecha actual. Puede verse completa (2026–2030), por año o solo los próximos 12 meses. Las actividades de la ruta crítica aparecen con borde grueso.
+La hoja de ruta completa en un diagrama de barras por fase, con los ocho hitos de control (H0 a H7) y una línea que marca la fecha actual. Puede verse completa (2026–2032), por año o solo los próximos 12 meses. Las actividades de la ruta crítica aparecen con borde grueso.
 
 ### Hitos
 Los ocho puntos de control del Plan. Cada uno indica su fecha, la instancia que lo declara cumplido y la lista de condiciones, marcadas a medida que se cumplen.
 
 ### Normativa
-Los 17 instrumentos normativos y académicos que requiere el Modelo, ordenados por etapa de trámite: *Por iniciar → Borrador → Revisión técnica → En CGA → En OCS → Aprobado*. Señala cuáles pertenecen al núcleo normativo y cuáles superaron su plazo.
+Los 21 instrumentos normativos y académicos que requiere el Modelo, incluidos los cuatro instructivos de concreción del Modelo por modalidad (presencial, semipresencial, en línea y Posgrado), ordenados por etapa de trámite: *Por iniciar → Borrador → Revisión técnica → En CGA → En OCS → Aprobado*. Señala cuáles pertenecen al bloque 1 (instrumentos de base, hasta julio de 2027) y cuáles superaron su plazo.
 
 ### Indicadores
-Los 16 indicadores del Plan, agrupados en ocho familias (implementación, curricular, aprendizaje, trayectoria, mejora, capacidades, pertinencia externa, y tecnología y datos), con su forma de medición, fuente, frecuencia, responsable y meta. Las metas numéricas se fijan con la línea base de julio de 2027.
+Los 17 indicadores del Plan, agrupados en ocho familias (implementación, curricular, aprendizaje, trayectoria, mejora, capacidades, pertinencia externa, y tecnología y datos), con su forma de medición, fuente, frecuencia, responsable y meta. Las metas numéricas se fijan con la línea base de julio de 2027.
 
 ### Riesgos
-Mapa de calor de los 13 riesgos del Plan según su probabilidad e impacto. Al hacer clic en una celda se ven los riesgos de esa celda, con su medida de control y su responsable.
+Mapa de calor de los 14 riesgos del Plan según su probabilidad e impacto. Al hacer clic en una celda se ven los riesgos de esa celda, con su medida de control y su responsable.
 
 ### Responsables
 Cuántas actividades tiene a cargo cada unidad y en qué situación están. Sirve para detectar a tiempo la sobrecarga de alguna unidad.
@@ -46,7 +46,7 @@ La lista completa de actividades en formato de tabla, que se puede ordenar y des
 ## Cómo usarlo
 
 - **Filtros** (parte superior): por fase, nivel de formación (Grado, Posgrado, Educación Continua o Transversal), unidad responsable, situación o palabra clave. Todos los números se recalculan según el filtro.
-- **Fecha de corte**: cambie la fecha para ver qué debería estar listo en otro momento. Por ejemplo, con la fecha de agosto de 2027 se ve qué debe estar cumplido antes del inicio del piloto. El botón **Hoy** vuelve a la fecha actual.
+- **Fecha de corte**: cambie la fecha para ver qué debería estar listo en otro momento. Por ejemplo, con la fecha de diciembre de 2027 se ve qué debe estar cumplido antes del piloto. El botón **Hoy** vuelve a la fecha actual.
 - **Detalle**: haga clic en cualquier actividad para ver su periodo, responsables, producto esperado, avance y enlace a la evidencia.
 - **Tema claro u oscuro**: botón ◐.
 
