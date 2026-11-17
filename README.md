@@ -14,7 +14,7 @@ Responsable del tablero: Dirección de Innovación de Procesos Académicos (DIPA
 La vista general del Plan a la fecha:
 - **Avance real** frente al avance que se esperaba a la fecha.
 - **Fase en curso** y **próximo hito**, con los días que faltan y las condiciones pendientes.
-- **Normativa aprobada**: cuántos de los 21 instrumentos ya están aprobados. Todos deben estarlo antes del piloto (hito H1, diciembre de 2027).
+- **Normativa aprobada**: cuántos de los 20 instrumentos ya están aprobados. Todos deben estarlo antes del piloto (hito H1, diciembre de 2027).
 - **Riesgos altos** activos.
 - **Curva de avance** 2026–2032: compara lo planificado con lo realmente logrado.
 - **Avance por fase**, **alertas** (actividades vencidas o atrasadas) y **entregas de los próximos 30 días**.
@@ -27,7 +27,7 @@ La hoja de ruta completa en un diagrama de barras por fase, con los ocho hitos d
 Los ocho puntos de control del Plan. Cada uno indica su fecha, la instancia que lo declara cumplido y la lista de condiciones, marcadas a medida que se cumplen.
 
 ### Normativa
-Los 21 instrumentos normativos y académicos que requiere el Modelo, incluidos los cuatro instructivos de concreción del Modelo por modalidad (presencial, semipresencial, en línea y Posgrado), ordenados por etapa de trámite: *Por iniciar → Borrador → Revisión técnica → En CGA → En OCS → Aprobado*. Señala cuáles pertenecen al bloque 1 (instrumentos de base, hasta julio de 2027) y cuáles superaron su plazo.
+Los 20 instrumentos normativos y académicos que requiere el Modelo, incluidos los cuatro instructivos de concreción del Modelo por modalidad (presencial, semipresencial, en línea y Posgrado), ordenados por etapa de trámite: *Por iniciar → Borrador → Revisión técnica → En CGA → En OCS → Aprobado*. Señala cuáles pertenecen al bloque 1 (instrumentos de base, hasta julio de 2027) y cuáles superaron su plazo.
 
 ### Indicadores
 Los 17 indicadores del Plan, agrupados en ocho familias (implementación, curricular, aprendizaje, trayectoria, mejora, capacidades, pertinencia externa, y tecnología y datos), con su forma de medición, fuente, frecuencia, responsable y meta. Las metas numéricas se fijan con la línea base de julio de 2027.

@@ -634,7 +634,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var acc = {}; ins.forEach(function (i) { acc[i.accion] = (acc[i.accion] || 0) + 1; });
     $("normKpis").innerHTML = [
       kpi("Aprobados", ins.filter(function (i) { return i.etapa === "Aprobado"; }).length + "<small> / " + ins.length + "</small>", Object.keys(acc).map(function (k) { return acc[k] + " " + k.toLowerCase(); }).join(" - ")),
-      kpi("Bloque 1 (hasta jul 2027)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 2a, 2b, 5 y 6 - todos antes de H1"),
+      kpi("Bloque 1 (hasta jul 2027)", ins.filter(function (i) { return i.nucleo && i.etapa === "Aprobado"; }).length + "<small> / " + ins.filter(function (i) { return i.nucleo; }).length + "</small>", "Instrumentos 1a, 1b, 4 y 5 - todos antes de H1"),
       kpi("Fuera de plazo", late + "", late ? "Plazo vencido sin aprobación" : "Ninguno a la fecha de corte"),
       kpi("Siguiente plazo", due ? esc(due.id) : "—", due ? esc(due.nombre) + " - " + fmt(due.plazo) : "")
     ].join("");
