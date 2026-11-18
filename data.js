@@ -13,7 +13,7 @@ window.PLAN_DATA = {
   meta: {
     titulo: "Plan de Implementación del Modelo Educativo UNEMI 2027–2032",
     version: "1",
-    corte: "2026-11-17",
+    corte: "2026-11-18",
     horizonte: ["2026-10-01", "2032-12-31"],
     proponente: "VAFG - Dirección de Innovación de Procesos Académicos"
   },
@@ -41,13 +41,13 @@ window.PLAN_DATA = {
     { id: "H3", fecha: "2028-12-15", fase: "F2", decide: "CGA", nombre: "Decisión de escalamiento",
       condiciones: ["Informe de pilotaje aprobado", "Normativa e instrumentos ajustados", "Decisión: extender sin cambios / con ajustes / repetir piloto"],
       cumplidas: [], estado: "Pendiente", fechaReal: null },
-    { id: "H4", fecha: "2029-12-14", fase: "F3", decide: "Comisión ocasional (la CGA remite el informe anual)", nombre: "Ola 1 evaluada",
+    { id: "H4", fecha: "2029-12-14", fase: "F3", decide: "CGA, con informe de la comisión ocasional", nombre: "Ola 1 evaluada",
       condiciones: ["Informe de cobertura, incidencias y resultados de la ola 1", "Informe anual del Modelo al OCS"],
       cumplidas: [], estado: "Pendiente", fechaReal: null },
     { id: "H5", fecha: "2030-12-18", fase: "F3", decide: "CGA (el OCS conoce el informe)", nombre: "Ola 2 incorporada",
       condiciones: ["Ola 2 incorporada y evaluada", "Informe anual del Modelo al OCS"],
       cumplidas: [], estado: "Pendiente", fechaReal: null },
-    { id: "H6", fecha: "2031-12-19", fase: "F4", decide: "CGA, CGC", nombre: "Modelo consolidado",
+    { id: "H6", fecha: "2031-12-19", fase: "F4", decide: "CGA (la CGC conoce los resultados)", nombre: "Modelo consolidado",
       condiciones: ["Modelo integrado a la autoevaluación", "Brechas del Modelo en el POA 2032"],
       cumplidas: [], estado: "Pendiente", fechaReal: null },
     { id: "H7", fecha: "2032-12-17", fase: "F5", decide: "OCS", nombre: "Evaluación integral 2027–2032",
@@ -57,13 +57,13 @@ window.PLAN_DATA = {
 
   // nivel: Grado | Posgrado | EC (Educación Continua) | Transversal
   actividades: [
-    // Ruta de aprobación (Tabla 30). R5 y R6: fechas por confirmar (antes de las sesiones de la CGA y del OCS).
+    // Ruta de aprobación (Tabla 30). R5 a R7 en la semana 15 (30 nov – 5 dic).
     { id: "R1", fase: "R", componente: "Aprobación", nombre: "Validar el inventario de normas, guías e instrumentos citados", inicio: "2026-10-16", fin: "2026-11-04", responsables: ["Equipo redactor (DIPA)"], nivel: "Transversal", producto: "Inventario validado", estado: "Completado", avance: 100, actualizado: "2026-11-17" },
     { id: "R2", fase: "R", componente: "Aprobación", nombre: "Revisión técnica del Plan", inicio: "2026-11-16", fin: "2026-11-21", responsables: ["CIAPC"], participan: ["DIPA"], nivel: "Transversal", producto: "Informe de revisión", estado: "No iniciado", avance: 0 },
     { id: "R3", fase: "R", componente: "Aprobación", nombre: "Comisión Pedagógica valida la coherencia técnica del Plan", inicio: "2026-11-23", fin: "2026-11-28", responsables: ["CP"], participan: ["DIPA"], nivel: "Transversal", producto: "Plan validado por la Comisión Pedagógica", estado: "No iniciado", avance: 0, critica: true },
     { id: "R4", fase: "R", componente: "Aprobación", nombre: "Armar el expediente (Modelo y Plan) y el oficio de remisión con los puntos a resolver", inicio: "2026-11-26", fin: "2026-11-28", responsables: ["DIPA"], participan: ["VAFG"], nivel: "Transversal", producto: "Expediente y oficio de remisión", estado: "No iniciado", avance: 0 },
-    { id: "R5", fase: "R", componente: "Aprobación", nombre: "VAFG revisa el expediente y lo remite a la CGA", inicio: "2026-11-30", fin: "2026-12-01", responsables: ["VAFG"], participan: ["DIPA"], nivel: "Transversal", producto: "Oficio de remisión a la CGA", estado: "No iniciado", avance: 0, nota: "Fecha por confirmar" },
-    { id: "R6", fase: "R", componente: "Aprobación", nombre: "CGA aprueba el Modelo y el Plan y los remite al OCS", inicio: "2026-12-01", fin: "2026-12-03", responsables: ["CGA"], participan: ["VAFG", "SG"], nivel: "Transversal", producto: "Resolución de la CGA", estado: "No iniciado", avance: 0, critica: true, nota: "Fecha por confirmar" },
+    { id: "R5", fase: "R", componente: "Aprobación", nombre: "VAFG revisa el expediente y lo remite a la CGA", inicio: "2026-11-30", fin: "2026-12-01", responsables: ["VAFG"], participan: ["DIPA"], nivel: "Transversal", producto: "Oficio de remisión a la CGA", estado: "No iniciado", avance: 0 },
+    { id: "R6", fase: "R", componente: "Aprobación", nombre: "CGA aprueba el Modelo y el Plan y los remite al OCS", inicio: "2026-12-01", fin: "2026-12-03", responsables: ["CGA"], participan: ["VAFG", "SG"], nivel: "Transversal", producto: "Resolución de la CGA", estado: "No iniciado", avance: 0, critica: true },
     { id: "R7", fase: "R", componente: "Aprobación", nombre: "OCS aprueba el Modelo y el Plan en la misma sesión", inicio: "2026-12-03", fin: "2026-12-05", responsables: ["OCS"], participan: ["SG"], nivel: "Transversal", producto: "Aprobación en sesión; la SG emite la resolución", estado: "No iniciado", avance: 0, critica: true },
 
     // Fase 0 (Tabla 15)

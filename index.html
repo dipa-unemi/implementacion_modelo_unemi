@@ -463,7 +463,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
     var nucleo = DATA.instrumentos.filter(function (i) { return i.nucleo; });
     var nucOk = nucleo.filter(function (i) { return i.etapa === "Aprobado"; }).length;
     var allOk = DATA.instrumentos.filter(function (i) { return i.etapa === "Aprobado"; }).length;
-    var riskHi = DATA.riesgos.filter(function (r) { return r.estado === "Activo" && r.prob * r.impacto >= 6; }).length;
+    var riskHi = DATA.riesgos.filter(function (r) { return r.estado === "Activo" && r.impacto === 3; }).length;
     var gap = pct(pr.plan) - pct(pr.real);
     var nextDays = next ? Math.round((d(next.fecha) - t) / DAY) : null;
     var faseActual = DATA.fases.filter(function (f) { return t >= d(f.inicio) && t <= d(f.fin); }).map(function (f) { return f.nombre; }).join(" / ") || (t < d(DATA.fases[0].inicio) ? "Antes del inicio" : "Plan concluido");
@@ -475,7 +475,7 @@ svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
       kpi("Próximo hito", next ? esc(next.id) + '<small> ' + (nextDays >= 0 ? "en " + nextDays + " días" : "atrasado " + (-nextDays) + " días") + "</small>" : "—", next ? esc(next.nombre) + " - " + fmt(next.fecha) + " - " + next.cumplidas.length + "/" + next.condiciones.length + " condiciones" : "Todos cumplidos"),
       kpi("Hitos cumplidos", hitosOk + "<small> / 8</small>", "Indicador I03 en la pestaña Indicadores"),
       kpi("Normativa aprobada", allOk + "<small> / " + DATA.instrumentos.length + "</small>", "Requisito de H1 - bloque 1: " + nucOk + " de " + nucleo.length, '<div class="meter"><i style="width:' + (allOk / DATA.instrumentos.length * 100) + '%"></i></div>'),
-      kpi("Riesgos altos activos", riskHi + "<small> / " + DATA.riesgos.length + "</small>", "Probabilidad × impacto ≥ 6")
+      kpi("Riesgos de impacto alto activos", riskHi + "<small> / " + DATA.riesgos.length + "</small>", "Impacto alto según la Tabla 28")
     ].join("");
 
     renderCurva(list);
